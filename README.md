@@ -1,2 +1,2 @@
 # ComputerNotes
-Notes taken when studying computer science
+Notes taken when studying computer science.

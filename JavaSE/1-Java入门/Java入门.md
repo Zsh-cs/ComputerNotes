@@ -36,7 +36,7 @@
 
 Java的产品叫作JDK(Java Development Kit：Java开发者工具包)，必须安装JDK才能使用Java。
 
-<img src="image/Java入门/image-20250226161250556.png" alt="image-20250226161250556" style="zoom:90%;" />
+<img src="images/Java入门/image-20250226161250556.png" alt="image-20250226161250556" style="zoom:90%;" />
 
 #### 2.验证JDK是否安装成功
 
@@ -56,7 +56,7 @@ Java的产品叫作JDK(Java Development Kit：Java开发者工具包)，必须�
 
 开发Java程序的三个步骤是：编写代码，编译代码，运行代码。
 
-<img src="image/Java入门/image-20250228204246536.png" alt="image-20250228204246536" style="zoom:80%;" />
+<img src="images/Java入门/image-20250228204246536.png" alt="image-20250228204246536" style="zoom:80%;" />
 
 #### Step1：编写源代码文件`HelloWorld.java`
 
@@ -74,11 +74,11 @@ public class HelloWorld{
 
 打开命令提示符，先通过cd命令进入源代码文件所在的文件夹，再执行命令`javac HelloWorld.java`。
 
-<img src="image/Java入门/image-20250228211959240.png" alt="image-20250228211959240" style="zoom:80%;" />
+<img src="images/Java入门/image-20250228211959240.png" alt="image-20250228211959240" style="zoom:80%;" />
 
 执行完该命令后，可以发现源代码文件所在的文件夹中新增了一个字节码文件`HelloWorld.class`。
 
-<img src="image/Java入门/image-20250228212742613.png" alt="image-20250228212742613" style="zoom:80%;" />
+<img src="images/Java入门/image-20250228212742613.png" alt="image-20250228212742613" style="zoom:80%;" />
 
 
 
@@ -86,7 +86,7 @@ public class HelloWorld{
 
 执行命令`java HelloWorld`。
 
-<img src="image/Java入门/image-20250228212258976.png" alt="image-20250228212258976" style="zoom:80%;" />
+<img src="images/Java入门/image-20250228212258976.png" alt="image-20250228212258976" style="zoom:80%;" />
 
 可以看到在命令的下一行成功打印出了"Hello World"。
 
@@ -113,6 +113,8 @@ JDK的组成如下：
 
 ### 七、安装JDK后的环境变量配置
 
+> [!Tip]
+>
 > 在电脑下方搜索栏中搜索“高级系统设置”，打开后点击上方的“高级”选项，然后点击“环境变量”即可进行环境变量配置。
 >
 > 用户变量配置只针对当前登录的用户有效，系统变量配置则对该电脑的所有用户有效。
@@ -123,7 +125,7 @@ Path环境变量用于记住程序路径，便于在命令提示符的任意目�
 
 原理如下：先去找当前目录下有无该程序，若找不到则再去Path环境变量中找。
 
-![image-20250228222150059](image/Java入门/image-20250228222150059.png)
+![image-20250228222150059](images/Java入门/image-20250228222150059.png)
 
 **注意**：目前较新版本的JDK在安装时会自动配置java和javac程序的路径到Path环境变量中去，因此它们可以直接使用。但老版本的JDK在安装时是不会自动配置Path环境变量的，我们要记得手动配置，配置完还必须在命令提示符输入`java -version`和`javac -version`来检测配置是否成功。
 
@@ -131,7 +133,7 @@ Path环境变量用于记住程序路径，便于在命令提示符的任意目�
 
 `JAVA_HOME`环境变量用于告诉操作系统JDK的安装目录（将来其他技术还要通过它来找JDK）。
 
-<img src="image/Java入门/image-20250228223756791.png" alt="image-20250228223756791" style="zoom:67%;" />
+<img src="images/Java入门/image-20250228223756791.png" alt="image-20250228223756791" style="zoom:67%;" />
 
 **注意**：较新版本的JDK只是自动配置了Path，并没有自动配置`JAVA_HOME`。
 

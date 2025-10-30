@@ -1,12 +1,12 @@
 # 常用API
 
+> [!IMPORTANT]
+>
 > API：Application Programming Interface，应用程序编程接口。
 
 ### 1.API文档
 
 + [JDK21-Docs](D:\ZSH-ComputerScience\Java-BackEnd\Java\JDK21-Docs\jdk-21.0.6_doc-all\docs\index.html)
-+ [JDK17-Docs](C:\Users\asus\Desktop\JDK-Docs\JDK17-Docs(Chinese).url)
-+ [JDK11-Docs](C:\Users\asus\Desktop\JDK-Docs\JDK11-Docs(Chinese).url)
 
 
 
@@ -91,13 +91,11 @@
 
 ### 3.`Scanner`
 
-+ 作用：接收用户键盘输入的数据。
++ **作用**：接收用户键盘输入的数据。
 
-+ 代码示例：输出用户输入的年龄和名字。
++ **代码示例**：输出用户输入的年龄和名字。
 
   ```java
-  package com.zsh.scanner;
-  
   import java.util.Scanner;
   
   public class Test {
@@ -114,22 +112,20 @@
       }
   }
   ```
-
+  
 + 控制台输出结果：
 
-  <img src="images/常用API/image-20250302205515605.png" alt="image-20250302205515605" style="zoom:80%;" />
+  <img src="images/image-20250302205515605.png" alt="image-20250302205515605" style="zoom:80%;" />
 
 
 
 ### 4.`Random`
 
-+ 作用：生成随机数。
++ **作用**：生成随机数。
 
-+ 代码示例：生成$[0,bound)$内的一个随机数。
++ **代码示例**：生成$[0,bound)$内的一个随机数。
 
   ```java
-  package com.zsh.random;
-  
   import java.util.Random;
   import java.util.Scanner;
   
@@ -145,10 +141,10 @@
       }
   }
   ```
-
+  
 + 控制台输出结果：
 
-  ![image-20250302211443474](images/常用API/image-20250302211443474.png)
+  ![image-20250302211443474](images/image-20250302211443474.png)
 
 
 
@@ -207,8 +203,6 @@ String schoolName="HIT";
 + 代码示例：
 
 ```java
-package string;
-
 public class StringDemo1 {
     public static void main(String[] args) {
         String s = "ArthurMorgan";
@@ -237,8 +231,6 @@ A r t h u r M o r g a n
 + 代码示例：
 
 ```java
-package string;
-
 public class StringDemo1 {
     public static void main(String[] args) {
         String s = "ArthurMorgan";
@@ -324,7 +316,7 @@ System.out.println(rs);
 
 ![image-20250320142132825](images/image-20250320142132825.png)
 
-每次试图改变字符串对象时，实际上产生了新的字符串对象，变量每次都是指向了新的字符串对象，旧的字符串对象的内容并没有改变，因此说`String`是不可变字符串对象。
+每次试图改变`String`对象时，实际上产生了新的`String`对象，旧的`String`对象的内容并没有改变，编译器只是将变量指向的`String`对象由旧对象修改为新对象。
 
 
 
@@ -388,8 +380,6 @@ System.out.println(rs);
 ##### 6.3.2 原代码分析
 
 ```java
-package arraylist;
-
 import java.util.ArrayList;
 
 public class Test {
@@ -509,8 +499,6 @@ for (int i = list.size()-1; i >= 0; i--) {
 **Tip2**：此外还必须在`main`方法开头抛出`CloneNotSupportedException`异常，否则依旧报错。
 
 ```java
-package api_object;
-
 public class Test {
     public static void main(String[] args) throws CloneNotSupportedException {
         Student s1 = new Student("zsh", 20);
@@ -523,13 +511,15 @@ public class Test {
 
 ##### 7.3.2 浅拷贝与深拷贝
 
+> [!Tip]
+>
 > 也叫浅克隆与深克隆。
 
-+ 浅拷贝：拷贝出的对象与原对象中的数据一模一样（引用类型数据拷贝的只是地址）。
++ **浅拷贝**：拷贝出的对象与原对象中的数据一模一样（引用类型数据拷贝的只是地址）。
 
 <img src="images/image-20250321000933497.png" alt="image-20250321000933497" style="zoom:67%;" />
 
-+ 深拷贝：
++ **深拷贝**：
   + 对象中的基本类型数据直接拷贝。
   + 对象中的字符串数据拷贝的还是地址。
   + 对象中的其他引用类型数据不会拷贝地址，而会创建新对象。
@@ -567,8 +557,6 @@ public class Test {
 来看下面的例子：
 
 ```java
-package api_objects;
-
 import java.util.Objects;
 
 public class Test {
@@ -672,7 +660,7 @@ debug原因参见源码：
 
 
 
-### 10.`StringBuilder`
+### 10.`StringBuilder`与`StringBuffer`
 
 #### 10.1 概述
 
@@ -693,12 +681,251 @@ debug原因参见源码：
 
 #### 10.3 常用方法
 
-| 序号 | 方法                             | 说明                                    |
-| ---- | -------------------------------- | --------------------------------------- |
-| 01   | `StringBuilder append(任意类型)` | 添加数据并返回`StringBuilder`对象本身。 |
-| 02   | `StringBuilder reverse()`        | 反转对象内容。                          |
-| 03   | `int length()`                   | 返回对象内容长度。                      |
-| 04   | `String toString()`              | 将`StringBuilder`转换成`String`。       |
+| 序号 | 方法                             | 说明                                                  |
+| ---- | -------------------------------- | ----------------------------------------------------- |
+| 01   | `StringBuilder append(任意类型)` | 添加数据并返回`StringBuilder`对象本身，支持链式编程。 |
+| 02   | `StringBuilder reverse()`        | 反转对象内容。                                        |
+| 03   | `int length()`                   | 返回对象内容长度（字符数）。                          |
+| 04   | `String toString()`              | 将`StringBuilder`转换成`String`。                     |
+
+
+
+#### 10.4 使用`StringBuilder`操作字符串的优势
+
+##### P1 原代码
+
+```java
+public class Test2 {
+    public static void main(String[] args) {
+        String rs = "";
+        for (int i = 0; i < 1000000; i++) {
+            rs += "abc";
+        }
+        System.out.println(rs);
+    }
+}
+```
+
+运行此代码后，控制台迟迟未输出结果，只能手动终止，证明以上代码运行效率极低。
+
+<img src="images/image-20251030220846703.png" alt="image-20251030220846703" style="zoom:67%;" />
+
+##### P2 使用`StringBuilder`优化后的代码
+
+```java
+public class Test2 {
+    public static void main(String[] args) {
+        StringBuilder stringBuilder=new StringBuilder();
+        for (int i = 0; i < 1000000; i++) {
+            stringBuilder.append("abc");
+        }
+        System.out.println(stringBuilder);
+    }
+}
+```
+
+运行此代码后，控制台只用了1~2秒便输出结果，效率大大提高。
+
+<img src="images/image-20251030221241955.png" alt="image-20251030221241955" style="zoom:67%;" />
+
+##### P3 分析及启示
+
++ **分析**：参见[5.6 注意事项](####5.6 注意事项)。
+  + `String`是不可变字符串对象，也就是说它一旦被赋值就不可改变。每次试图改变`String`对象时，实际上产生了新的`String`对象，旧的`String`对象的内容并没有改变，编译器只是将变量指向的`String`对象由旧对象修改为新对象，因此原代码在`for`循环中每运行一次就会创建一个新的`String`对象，这大大增加了内存开销，导致运行效率极低。
+  + 而`StringBuilder`是可变字符串对象，这意味着在`for`循环中无论运行多少次，变量指向的都是最初的`StringBuilder`对象，内存开销减少，效率自然就上来了。
++ **启示**：
+  + 如果需要频繁拼接或修改字符串，建议使用`StringBuilder`，效率会更高！
+  + 如果对字符串操作较少，或者不需要操作字符串，只是为了定义字符串变量，则建议使用`String`。
+
+
+
+#### 10.5 `StringBuffer`
+
++ `StringBuffer`和`StringBuilder`的用法完全一致。
++ **区别**：`StringBuffer`是线程安全的，`StringBuilder`是线程不安全的。
+
+
+
+#### 10.6 综合案例
+
++ **需求**：设计一个方法，将一个整型数组的内容输出为指定格式的字符串，形如`[11, 22, 33]`。
+
++ **代码**：
+
+  ```java
+  public class Test3 {
+      public static void main(String[] args) {
+          System.out.println(transferArrayToFormattedString(new int[]{11, 22, 33}));
+      }
+  
+      public static String transferArrayToFormattedString(int[] array) {
+          // 1.非空校验
+          if (array == null) {
+              return null;
+          }
+  
+          // 2.若array非空，则使用StringBuilder将其内容输出为指定格式的字符串
+          StringBuilder stringBuilder = new StringBuilder();
+          stringBuilder.append("[");
+          // 遍历到倒数第二个元素即可，否则最后一个元素末尾也会拼接", "
+          for (int i = 0; i < array.length - 1; i++) {
+              stringBuilder.append(array[i]).append(", ");
+          }
+          stringBuilder.append(array[array.length-1]).append("]");
+  
+          // 3.将StringBuilder对象转换为String对象再返回
+          return stringBuilder.toString();
+      }
+  }
+  ```
+
++ **控制台**：
+
+  <img src="images/image-20251030225156275.png" alt="image-20251030225156275" style="zoom:67%;" />
+
+
+
+---
+
+
+
+### 11.`StringJoiner`
+
+#### 11.1 概述
+
++ `JDK8`开始才推出的新`API`，和`StringBuilder`一样也是用来操作字符串的，也可以看作是一个容器，创建之后内容可变。
++ **优势**：不仅能提高字符串的操作效率，而且在某些场景下使用它操作字符串，==代码会更简洁==，参见[11.4](####11.4 使用`StringJoiner`重新实现综合案例[10.6](####10.6 综合案例))
+
+
+
+#### 11.2 构造器
+
+| 序号 | 构造器                                        | 说明                                                         |
+| ---- | --------------------------------------------- | ------------------------------------------------------------ |
+| 01   | `public StringJoiner(间隔符)`                 | 创建一个`StringJoiner`对象，指定拼接时的间隔符。             |
+| 02   | `public StringJoiner(间隔符, 开始符, 结束符)` | 创建一个`StringJoiner`对象，指定拼接时的间隔符、开始符和结束符。 |
+
+
+
+#### 11.3 常用方法
+
+| 序号 | 常用方法                                    | 说明                           |
+| ---- | ------------------------------------------- | ------------------------------ |
+| 01   | `StringJoiner add(CharSequence newElement)` | 拼接字符序列，并返回对象本身。 |
+| 02   | `int length()`                              | 返回对象内容长度（字符数）。   |
+| 03   | `String toString()`                         | 返回拼接之后的字符串。         |
+
+
+
+#### 11.4 使用`StringJoiner`重新实现综合案例[10.6](####10.6 综合案例)
+
++ **代码**：
+
+  ```java
+  import java.util.StringJoiner;
+  
+  public class Test3 {
+      public static void main(String[] args) {
+          System.out.println(transferArrayToFormattedString(new int[]{11, 22, 33}));
+      }
+  
+      public static String transferArrayToFormattedString(int[] array){
+          // 1.非空校验
+          if (array == null) {
+              return null;
+          }
+  
+          // 2.若array非空，则使用StringJoiner将其内容输出为指定格式的字符串
+          StringJoiner stringJoiner=new StringJoiner(", ", "[", "]");
+          for (int i = 0; i < array.length; i++) {
+              stringJoiner.add(String.valueOf(array[i]));
+          }
+  
+          // 3.将StringJoiner对象转换为String对象再返回
+          return stringJoiner.toString();
+      }
+  }
+  ```
+
++ **控制台**：
+
+  <img src="images/image-20251030233136571.png" alt="image-20251030233136571" style="zoom:67%;" />
+
+
+
+---
+
+
+
+### 12.`Math`
+
+#### 12.1 概述
+
++ `Math`即数学类，是一个工具类，里面提供的都是对数据进行操作的一些静态方法。
+
+#### 12.2 常用方法
+
+| 序号 | 方法                                    | 说明                                                  |
+| ---- | --------------------------------------- | ----------------------------------------------------- |
+| 01   | `static int abs(int a)`                 | 返回a的绝对值                                         |
+| 02   | `static double ceil(double a)`          | 对a向上取整                                           |
+| 03   | `static double floor(double a)`         | 对a向下取整                                           |
+| 04   | `static int round(float a)`             | 对a四舍五入                                           |
+| 05   | `static int max(int a, int b)`          | 返回a和b中的较大值                                    |
+| 06   | `static double pow(double a, double b)` | 返回$a^b$                                             |
+| 07   | `static double random()`                | 返回一个`double`类型的**伪随机数**，范围是$[0.0,1.0)$ |
+
+
+
+---
+
+
+
+### 13.`System`
+
+#### 13.1 概述
+
++ `System`指代程序所在的系统，也是一个工具类。
+
+#### 13.2 常用方法
+
+| 序号 | 方法                             | 说明                                                         |
+| ---- | -------------------------------- | ------------------------------------------------------------ |
+| 01   | `static void exit(int status)`   | 退出当前运行的JVM，`status`取0时表示正常退出，取其它值表示异常退出。 |
+| 02   | `static long currentTimeMills()` | 以毫秒形式返回当前系统时间戳。                               |
+
+
+
+---
+
+
+
+### 14.`Runtime`
+
+#### 14.1 概述
+
++ `Runtime`指代程序所在的运行环境，分析源码可知它是一个单例类。
+
+  <img src="images/image-20251031000713342.png" alt="image-20251031000713342" style="zoom: 80%;" />
+
+#### 14.2 常用方法
+
+| 序号 | 方法                           | 说明                                     |
+| ---- | ------------------------------ | ---------------------------------------- |
+| 01   | `static Runtime getRuntime()`  | 返回与当前Java应用程序关联的运行时对象。 |
+| 02   | `void exit(int status)`        | 退出当前运行的JVM。                      |
+| 03   | `int availableProcessors()`    | 返回JVM可用的处理器数量。                |
+| 04   | `long totalMemory()`           | 返回JVM中的内存总量（单位：字节）。      |
+| 05   | `long freeMemory()`            | 返回JVM中的可用内存量（单位：字节）。    |
+| 06   | `Process exec(String command)` | 执行某个进程，并返回代表该进程的对象。   |
+
+
+
+
+
+
+
+
 
 
 
