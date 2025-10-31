@@ -921,21 +921,98 @@ public class Test2 {
 
 
 
+---
 
 
 
+### 15.`BigDecimal`
+
+#### 15.1 引入背景
+
+`BigDecimal`是为了解决浮点数运算时结果失真的问题。
+
+首先编写以下测试代码：
+
+```java
+public class Test1 {
+    public static void main(String[] args) {
+        double a = 0.1;
+        double b = 0.2;
+        System.out.println(a + "+" + b + "=" + (a + b));
+    }
+}
+```
+
+代码运行后控制台输出结果与我们的常识不符：
+
+<img src="images/image-20251101003006348.png" alt="image-20251101003006348" style="zoom:67%;" />
+
+这是由于浮点数精度是有限的，因为0.1和0.2是二进制下的无限循环小数，所以它们转换成IEEE754双精度浮点数后势必丢失精度，因此结果转换回十进制会不精确。
 
 
 
+#### 15.2 底层原理：为什么`BigDecimal`是精确的？
+
+`BigDecimal`根本不把数字存储为二进制小数。它直接存储十进制数字的每一位（作为整数），并记录小数点位置。所有的计算都是基于整数运算完成的，因此可以精确表示像 0.1和0.2这样的数。
 
 
 
+#### 15.3 构造器
+
+| 序号 | 构造器                          | 说明                                                         |
+| ---- | ------------------------------- | ------------------------------------------------------------ |
+| 01   | `public BigDecimal(double val)` | 将`double`类型变量转换为`BigDecimal`类型变量，==不推荐使用==。 |
+| 02   | `public BigDecimal(String val)` | 将`String`类型变量转换为`BigDecimal`类型变量。               |
 
 
 
+#### 15.4 常用方法
+
+| 序号 | 方法                                                  | 说明                                                         |
+| ---- | ----------------------------------------------------- | ------------------------------------------------------------ |
+| 01   | `staic BigDecimal valueOf(double val)`                | 将`double`类型变量转换为`BigDecimal`类型变量，==推荐使用==。 |
+| 02   | `BigDecimal add(BigDecimal b)`                        | 加                                                           |
+| 03   | `BigDecimal subtract(BigDecimal b)`                   | 减                                                           |
+| 04   | `BigDecimal multiply(BigDecimal b)`                   | 乘                                                           |
+| 05   | `BigDecimal divide(BigDecimal b)`                     | 除                                                           |
+| 06   | `BigDecimal divide(BigDecimal b, 精确几位, 舍入模式)` | 除，可以控制精确到小数点后几位和采用何种舍入模式。           |
+| 07   | `double doubleValue()`                                | 将`BigDecimal`类型变量转换为`double`类型变量。               |
 
 
 
+#### 15.5 使用`BigDecimal`重构测试代码
+
++ **代码**：
+
+  ```Java
+  public class Test1 {
+      public static void main(String[] args) {
+          double a = 0.1;
+          double b = 0.2;
+          BigDecimal a1 = BigDecimal.valueOf(a);
+          BigDecimal b1 = BigDecimal.valueOf(b);
+          System.out.println(a + "+" + b + "=" + a1.add(b1));
+      }
+  }
+  ```
+
++ **控制台**：输出了正确结果，没有发生精度丢失。
+
+  <img src="images/image-20251101005425427.png" alt="image-20251101005425427" style="zoom:67%;" />
+
+
+
+---
+
+
+
+### 16.日期与时间
+
+#### 16.1 `JDK8`之前传统的日期与时间
+
+
+
+#### 16.2 `JDK8`开始新增的日期与时间
 
 
 

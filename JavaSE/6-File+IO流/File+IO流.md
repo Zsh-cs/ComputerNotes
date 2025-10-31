@@ -1,10 +1,186 @@
-# IO流
+# File+IO流
 
-#### 一、字节流
+### 一、File
 
-###### **1**.字节输入流`InputStream`
+#### 1.创建文件对象
+
+1. 根据文件路径创建文件对象：`public File(String pathname)`
+
+2. 根据父路径和子路径名字创建文件对象：`public File(String parent,String child)`
+
+3. 根据父路径对应的文件对象和子路径名字创建文件对象：`public File(File parent,String child)`
 
 
+
+#### 2.判断文件类型
+
+1. 判断当前文件对象对应的路径是否存在：`public boolean exists(File file)`
+
+2. 判断当前文件对象指代的是否为文件：`public boolean isFile(File file)`     
+
+3. 判断当前文件对象指代的是否为文件夹：`public boolean isDirectory(File file)`
+
+
+
+#### 3.获取文件信息
+
+1. 获取文件名称（含后缀名）：`public String getName(File file)`
+
+2. 获取文件的大小（字节数）：`public long length(File file)`
+
+3. 获取文件最后的修改时间：`public long lastModified(File file)`
+
+4. 获取创建文件对象时所使用的路径：
+
+   ```java
+   public String getPath(File file)
+   public String getAbsolutePath(File file)//绝对路径
+   ```
+
+   
+
+#### 4.使用文件对象进行创建和删除文件（夹）
+
+##### 4.1 创建一个新的空文件
+
+`public boolean createNewFile()`
+
+示例如下：
+
+```java
+File f=new File("D:\\ZSH-Computer Science\\Java\\zsh1.txt");//此时还不存在zsh1.txt这个文件
+f.createNewFile();//调用完此方法后，会自动帮我们在指定路径处生成一个zsh1.txt的空文件
+				  //注意：若再次调用上述方法，会返回false，因为zsh1.txt这个文件已存在
+```
+
+##### 4.2 创建文件夹
+
+```java
+public boolean mkdir();//只能创建一级文件夹
+public boolean mkdirs();//可以创建多级文件夹
+```
+
+##### 4.3 删除文件或者空文件夹，删除后的文件不会进入回收站，而是直接永久删除。
+
+注意：无法删除非空文件夹。
+
+`public boolean delete()`
+
+
+
+#### 5.遍历文件夹
+
+##### 5.1 获取当前目录下所有“一级文件**名称**”，存入一个**字符串数组**中并返回
+
+`public String[] list()`
+
+示例如下：
+
+```java
+File f=new File("D:\\ZSH-Computer Science");
+String[] fileNames=f.list();
+for(String fileName : fileNames){
+    System.out.println(fileName);
+}
+```
+
+
+
+##### 5.2 （重点）获取当前目录下所有“一级文件**对象**”，存入一个**文件对象数组**中并返回
+
+`public File[] listFiles()`
+
+示例如下：
+
+```java
+File f=new File("D:\\ZSH-Computer Science");
+File[] files=f.listFiles();
+for(File file : files){
+    file.delete();
+}
+```
+
+使用`listFiles`方法时的注意事项如下：
+
+<img src="C:\Users\asus\AppData\Roaming\Typora\typora-user-images\image-20240910231737108.png" alt="image-20240910231737108" style="zoom: 80%;" />
+
+
+
+##### 5.3 经典问题：在某个大文件夹（比如D盘）下搜索某个小文件
+
+**算法思想**：方法递归
+
+**思路分析**：
+
+（1）使用`listFiles`方法找出大文件夹下的所有**一级文件对象**
+
+（2）对所有**一级文件对象**进行遍历，判断是否为文件
+
+（3）若是文件，则判断是否为目标文件
+
+（4）若是文件夹，则需要进入该文件夹，并重复上述流程（**递归**）
+
+**代码实现**：
+
+```java
+package File;
+import java.io.File;
+
+public class FileSearch {
+    public static void main(String[] args) {
+        //需求：从D盘中找出myFirstFile.txt这个文件并输出其绝对路径
+        searchFile(new File("D:/"), "myFirstFile.txt");
+    }
+
+    /**
+     * 在某个大文件夹（比如D盘）下搜索某个小文件
+     * @param dir      大文件夹
+     * @param fileName 目标文件的名称
+     */
+    public static void searchFile(File dir, String fileName) {
+        /*1.拦截非法情况*/
+        if (dir == null || !dir.exists() || dir.isFile()) {
+            return;//代表无法搜索
+        }
+
+        /*2.若dir是非空文件夹，执行以下核心逻辑*/
+        
+        //2.1 获取当前目录下的所有一级文件对象，并存入到文件对象数组files中
+        File[] files = dir.listFiles();
+
+        //2.2 判断当前目录下是否存在一级文件对象
+        if (files != null && files.length > 0) {
+            //2.3 遍历所有一级文件对象
+            for (File f : files) {
+                
+                //2.4.1 若f是文件，则判断其名称是否与目标文件的名称相一致
+                if (f.isFile()) {
+                    if (f.getName().contains(fileName)) {
+                        System.out.println(("The file's pathname is " + f.getAbsolutePath()));
+                    }
+                }
+                
+                //2.4.2 若f是文件夹，则继续重复上述流程（递归）
+                else{
+                    searchFile(f,fileName);
+                }
+            }
+        }
+    }
+}
+```
+
+
+
+---
+
+
+
+### 二、IO流
+
+#### 1.字节流
+
+##### **1**.1 字节输入流`InputStream`
 
 *a*.`FileInputStream`:文件字节输入流
 
@@ -48,7 +224,7 @@
 
 
 
-###### **2**.字节输出流`OutputStream`
+##### 1.2 字节输出流`OutputStream`
 
 *a*.`FileOutputStream`:文件字节输出流
 
@@ -101,11 +277,9 @@
 
 
 
-#### 二、字符流
+#### 2.字符流
 
-###### 1.字符输入流`Reader`
-
-
+##### 2.1 字符输入流`Reader`
 
 *a*.`FileReader`:文件字符输入流
 
@@ -150,9 +324,7 @@
 
 
 
-###### 2.字符输出流`Writer`
-
-
+##### 2.2 字符输出流`Writer`
 
 *a*.`FileWriter`:文件字符输出流
 
@@ -225,9 +397,9 @@
 
 
 
-#### 三、释放资源的方式
+#### 3.释放资源的方式
 
-###### 1.`try-catch-finally`
+##### 3.1 `try-catch-finally`
 
 **格式**：
 
@@ -273,7 +445,7 @@ try{
 
 
 
-###### 2.`try-with-resource`(After JDK1.7)(推荐使用)
+##### 3.2 `try-with-resource`(After JDK1.7)(推荐使用)
 
 **格式**：
 
@@ -307,17 +479,17 @@ try(
 
 
 
-#### 四、转换流
+#### 4.转换流
 
-###### 1.引入背景：
+##### 4.1 引入背景
 
-代码编码和被读取的文本文件编码不一致时，使用字符流读取文本文件就会产生乱码
++ 代码编码和被读取的文本文件编码不一致时，使用字符流读取文本文件就会产生乱码。
 
-为了解决这一问题，我们引入了转换流
++ 为了解决这一问题，我们引入了转换流。
 
 
 
-###### 2.分类
+##### 4.2 分类
 
 *a*.`InputStreamReader`:字符输入转换流
 
@@ -355,9 +527,9 @@ try(
 
 
 
-#### 五、打印流
+#### 5.打印流
 
-###### 1.`PrintStream`
+##### 5.1 `PrintStream`
 
 **作用**：打印流可以实现更方便、更高效地打印数据出去
 
@@ -391,7 +563,7 @@ try(
 
 
 
-###### 2.`PrintWriter`
+##### 5.2 `PrintWriter`
 
 **作用**：同`PrintStream`
 
@@ -416,7 +588,7 @@ try(
 
 
 
-###### **3.应用：输出语句的重定向**
+##### 5.3 应用：输出语句的重定向
 
 **介绍**：我们的输出语句默认是打印在控制台上，而利用打印流，我们可以把输出语句打印到某个文件中去
 
@@ -442,9 +614,9 @@ try( PrintStream ps=new PrintStream("D:\\ZSH-Computer Science\\Java\\JavaFile\\a
 
 
 
-#### 六、数据流
+#### 6.数据流
 
-###### 1.`DataOutputStream`:数据输出流
+##### 6.1 `DataOutputStream`:数据输出流
 
 **作用**：允许把**数据和其类型**一并写入磁盘文件中
 
@@ -474,7 +646,7 @@ try( PrintStream ps=new PrintStream("D:\\ZSH-Computer Science\\Java\\JavaFile\\a
 
 
 
-###### 2.`DataInputStream`:数据输入流
+##### 6.2 `DataInputStream`:数据输入流
 
 **作用**：读取数据输出流`DataOutputStream`写出去的数据
 
@@ -510,41 +682,41 @@ try( PrintStream ps=new PrintStream("D:\\ZSH-Computer Science\\Java\\JavaFile\\a
 
 
 
-#### 七、序列化流
+#### 7.序列化流
 
-###### 1.前置知识
+##### 7.1 前置知识
 
-**对象序列化**：把`Java`对象写入到磁盘文件中
++ **对象序列化**：把`Java`对象写入到磁盘文件中
 
-**对象反序列化**：把磁盘文件中的`Java`对象读出到内存中来
-
-
-
-###### 2.`ObjectOutputStream`:对象字节输出流
-
-**作用**：把`Java`对象进行序列化
-
-**构造器**：`public ObjectOutputStream(OutputStream os)`     创建新的对象字节输出流来包装基础的字节输出流
-
-**方法**：`final void writeObject(Object o) throws IOException`     把对象写出去
-
-**注意**：对象如果要参与序列化，必须实现序列化接口（`java.io.Serializable`）
++ **对象反序列化**：把磁盘文件中的`Java`对象读出到内存中来
 
 
 
-###### 3.`ObjectInputStream`:对象字节输入流
+##### 7.2 `ObjectOutputStream`:对象字节输出流
 
-**作用**：把`Java`对象进行反序列化
++ **作用**：把`Java`对象进行序列化
 
-**构造器**：`public ObjectInputStream(OutputStream os)`     创建新的对象字节输入流来包装基础的字节输入流
++ **构造器**：`public ObjectOutputStream(OutputStream os)`     创建新的对象字节输出流来包装基础的字节输出流
 
-**方法**：`final Object readObject() throws IOException`     把对象读进来
++ **方法**：`final void writeObject(Object o) throws IOException`     把对象写出去
+
++ **注意**：对象如果要参与序列化，必须实现序列化接口（`java.io.Serializable`）
+
+
+
+##### 7.3 `ObjectInputStream`:对象字节输入流
+
++ **作用**：把`Java`对象进行反序列化
+
++ **构造器**：`public ObjectInputStream(OutputStream os)`     创建新的对象字节输入流来包装基础的字节输入流
+
++ **方法**：`final Object readObject() throws IOException`     把对象读进来
 
 
 
 
 
-4.**代码演示**：
+##### 7.4 代码演示
 
 （1）先创建一个`Java`对象`User`类
 
@@ -685,9 +857,9 @@ public class test2 {
 
 
 
-5.一次性序列化多个对象的方法：
+##### 7.5 一次性序列化多个对象的方法
 
-使用一个`ArrayList`集合存储多个对象，然后直接对该集合进行序列化即可
+使用一个`ArrayList`集合存储多个对象，然后直接对该集合进行序列化即可。
 
 **注意**：`ArrayList`集合已经实现了序列化接口！
 
@@ -697,9 +869,9 @@ public class test2 {
 
 
 
-#### 八、总结
+#### 8.总结
 
-<img src="C:\Users\asus\AppData\Roaming\Typora\typora-user-images\image-20240913205101613.png" alt="image-20240913205101613" style="zoom:150%;" />
+<img src="images/image-20240913205101613.png" alt="image-20240913205101613" style="zoom: 80%;" />
 
 
 
@@ -707,27 +879,27 @@ public class test2 {
 
 
 
-#### 九、拓展：IO框架
+#### 9.拓展：IO框架
 
-###### 1.框架的定义：
+##### 9.1 框架的定义
 
 为了解决某一类问题而编写的一套类和接口，可以理解成一个半成品
 
-###### 2.使用框架的好处：
+##### 9.2 使用框架的好处
 
 在框架的基础上进行软件开发，可以得到优秀的软件架构，并且大大提高开发效率
 
-###### 3.框架的形式：
+##### 9.3 框架的形式
 
 通常是把所有类和接口等编译成`class`形式，再压缩成一个`.jar`结尾的文件包发行到市面上
 
-###### 4.IO框架：
+##### 9.4 IO框架
 
 封装了`Java`提供的对文件和数据进行操作的代码，对外提供了更简单的方式来对文件进行操作、对数据进行读写等
 
-###### 5.`Commons-io`:
+##### 9.5 `Commons-io`
 
-+ `Commons-io`是`Apache`开源基金组织提供的一组有关IO操作的框架，用于提高IO流的开发效率
++ `Commons-io`是`Apache`开源基金组织提供的一组有关IO操作的框架，用于提高IO流的开发效率。
 
 + `FileUtils`类提供的部分方法：
 
@@ -743,7 +915,7 @@ public class test2 {
 
     删除文件夹
 
-  +  `public static String readFileToString(File file,String encoding)`
+  + `public static String readFileToString(File file,String encoding)`
 
     读数据
 
