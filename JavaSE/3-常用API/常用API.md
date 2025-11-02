@@ -80,7 +80,7 @@
   }
   ```
 
-+ 控制台输出结果：
++ **控制台**：
 
   ```
   this class locates in package1
@@ -113,7 +113,7 @@
   }
   ```
   
-+ 控制台输出结果：
++ **控制台**：
 
   <img src="images/image-20250302205515605.png" alt="image-20250302205515605" style="zoom:80%;" />
 
@@ -142,7 +142,7 @@
   }
   ```
   
-+ 控制台输出结果：
++ **控制台**：
 
   ![image-20250302211443474](images/image-20250302211443474.png)
 
@@ -859,11 +859,9 @@ public class Test2 {
 
 ### 12.`Math`
 
-#### 12.1 概述
+> 数学类，是一个工具类，里面提供的都是对数据进行操作的一些静态方法。
 
-+ `Math`即数学类，是一个工具类，里面提供的都是对数据进行操作的一些静态方法。
-
-#### 12.2 常用方法
+#### 常用方法
 
 | 序号 | 方法                                    | 说明                                                  |
 | ---- | --------------------------------------- | ----------------------------------------------------- |
@@ -883,16 +881,14 @@ public class Test2 {
 
 ### 13.`System`
 
-#### 13.1 概述
+> 代表程序所在的系统，也是一个工具类。
 
-+ `System`指代程序所在的系统，也是一个工具类。
+#### 常用方法
 
-#### 13.2 常用方法
-
-| 序号 | 方法                             | 说明                                                         |
-| ---- | -------------------------------- | ------------------------------------------------------------ |
-| 01   | `static void exit(int status)`   | 退出当前运行的JVM，`status`取0时表示正常退出，取其它值表示异常退出。 |
-| 02   | `static long currentTimeMills()` | 以毫秒形式返回当前系统时间戳。                               |
+| 序号 | 方法                              | 说明                                                         |
+| ---- | --------------------------------- | ------------------------------------------------------------ |
+| 01   | `static void exit(int status)`    | 退出当前运行的JVM，`status`取0时表示正常退出，取其它值表示异常退出。 |
+| 02   | `static long currentTimeMillis()` | 以毫秒形式返回当前系统时间戳。                               |
 
 
 
@@ -1008,11 +1004,278 @@ public class Test1 {
 
 ### 16.日期与时间
 
-#### 16.1 `JDK8`之前传统的日期与时间
+#### 16.1 `JDK8`之前传统的日期与时间（不推荐，仅用于老项目维护）
+
+##### 16.1.1 `Date`
+
+> 代表日期和时间。
+
+###### P1 构造器
+
+| 序号 | 构造器                   | 说明                                               |
+| ---- | ------------------------ | -------------------------------------------------- |
+| 01   | `public Date()`          | 创建一个`Date`对象，代表系统此时此刻的日期和时间。 |
+| 02   | `public Date(long time)` | 把当前时间的毫秒值转换成`Date`对象。               |
+
+###### P2 常用方法
+
+| 序号 | 方法                      | 说明                             |
+| ---- | ------------------------- | -------------------------------- |
+| 01   | `long getTime()`          | 返回当前时间戳的毫秒值。         |
+| 02   | `void setTime(long time)` | 将`Date`对象的时间设置为`time`。 |
 
 
 
-#### 16.2 `JDK8`开始新增的日期与时间
+##### 16.1.2 `SimpleDateFormat`
+
+> 代表简单日期格式化，可以将`Date`对象或时间戳格式化成指定形式。
+
+###### P0 日期时间格式
+
+<img src="images/image-20251102182104712.png" alt="image-20251102182104712" style="zoom:80%;" />
+
+<img src="images/image-20251102182305532.png" alt="image-20251102182305532" style="zoom:80%;" />
+
+###### P1 构造器
+
+| 序号 | 构造器                                    | 说明                                                         |
+| ---- | ----------------------------------------- | ------------------------------------------------------------ |
+| 01   | `public SimpleDateFormat(String pattern)` | 创建一个`SimpleDateFormat`对象，并封装我们指定的日期时间格式。 |
+
+###### P2 常用方法
+
+| 序号 | 方法                               | 说明                                                         |
+| ---- | ---------------------------------- | ------------------------------------------------------------ |
+| 01   | `final String format(Date date)`   | 将`Date`对象格式化成日期时间字符串。                         |
+| 02   | `final String format(Object time)` | 将时间戳格式化成日期时间字符串。                             |
+| 03   | `Date parse(Stirng source)`        | 将日期时间字符串解析成`Date`对象。<br />**注意**：创建的`SimpleDateFormat`对象的日期时间格式必须与`source`的日期格式保持一致，否则报错。 |
 
 
 
+##### 16.1.3 练习：秒杀活动
+
+###### P1 需求
+
+<img src="images/image-20251102184141301.png" alt="image-20251102184141301" style="zoom:67%;" />
+
+###### P2 代码实现
+
+```java
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
+public class FlashSale {
+    private static final String START_TIME = "2023年11月11日 0:00:00";
+    private static final String END_TIME = "2023年11月11日 0:10:00";
+    private static final String XIAO_JIA_PAY_TIME = "2023年11月11日 0:01:18";
+    private static final String XIAO_PI_PAY_TIME = "2023年11月11日 0:10:51";
+
+    public static void main(String[] args) throws ParseException {
+
+        long startTime = parseDateToTime(START_TIME);
+        long endTime = parseDateToTime(END_TIME);
+        long xiaoJiaPayTime = parseDateToTime(XIAO_JIA_PAY_TIME);
+        long xiaoPiPayTime = parseDateToTime(XIAO_PI_PAY_TIME);
+
+        if (getQuality(xiaoJiaPayTime, startTime, endTime)) {
+            System.out.println("小贾参加了秒杀活动");
+        } else {
+            System.out.println("小贾没有参加秒杀活动");
+        }
+
+        if (getQuality(xiaoPiPayTime, startTime, endTime)) {
+            System.out.println("小皮参加了秒杀活动");
+        } else {
+            System.out.println("小皮没有参加秒杀活动");
+        }
+    }
+
+    private static long parseDateToTime(String dateString) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 H:mm:ss");
+        return dateFormat.parse(dateString).getTime();
+    }
+
+    private static boolean getQuality(long payTime, long startTime, long endTime) {
+        if (payTime >= startTime && payTime <= endTime) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+```
+
+###### P3 控制台
+
+<img src="images/image-20251102190512079.png" alt="image-20251102190512079" style="zoom:67%;" />
+
+
+
+##### 16.1.4 `Calendar`
+
+> 代表此时此刻对应的日历，通过`Calendar`可以单独获取和修改`Date`对象中的年、月、日、时、分、秒等等，
+
+###### 常用方法
+
+| 序号 | 方法                              | 说明                                                       |
+| ---- | --------------------------------- | ---------------------------------------------------------- |
+| 01   | `static Calendar getInstance()`   | 获取当前日历对象。                                         |
+| 02   | `int get(int field)`              | 获取日历中的某个信息。                                     |
+| 03   | `final Date getTime()`            | 获取`Date`对象，                                           |
+| 04   | `long getTimeMillis()`            | 获取时间戳。                                               |
+| 05   | `void set(int field, int value)`  | 修改日历的某个信息。                                       |
+| 06   | `void add(int field, int amount)` | 为某个信息增加指定的值。（也可以减少，`amount`取负值即可） |
+
+
+
+---
+
+
+
+#### 16.2 `JDK8`开始新增的日期与时间（推荐）
+
+##### 16.2.1 为什么要学习新增的日期与时间？
+
++ **传统日期与时间的局限性**：
+  + 设计不合理，使用不方便，大多数被淘汰了。
+  + 都是==可变==对象，修改后会丢失最开始的日期时间信息。
+  + 线程不安全。
+  + 只能精确到毫秒级。
++ **新增日期与时间的优势**：
+  + 设计更合理，使用更方便，功能丰富。
+  + 都是==不可变==对象，修改后会返回新的时间对象，不会丢失最开始的日期时间信息。
+  + 线程安全。
+  + 能精确到纳秒级。
+
+
+
+##### 16.2.2 代替`Calendar`--`Local`家族
+
+> [!Warning]
+>
+> 以下行文中，LocalXxx指代`LocalDate/LocalTime/LocalDateTime`，
+>
+> Yyy指代`Year/MonthValue/DayOfMonth/DayOfYear/Hour/Minute/Second/Nano`（即下文所述的“某个信息”）。
+
+###### P1 分类
+
++ `LocalDate`：本地日期（年、月、日、星期）。
++ `LocalTime`：本地时间（时、分、秒、纳秒）。
++ `LocalDateTime`：本地日期时间（年、月、日、星期、时、分、秒、纳秒）。
+
+###### P2 获取对象的方法
+
+| 序号 | 方法                                      | 说明                                   |
+| ---- | ----------------------------------------- | -------------------------------------- |
+| 01   | `static LocalXxx now()`                   | 获取系统当前时间对应的`LocalXxx`对象。 |
+| 02   | `static LocalXxx of(param1, param2, ...)` | 获取指定时间的`LocalXxx`对象。         |
+
+###### P3 三者通用方法
+
+| 序号 | 方法                                      | 说明                                                         |
+| ---- | ----------------------------------------- | ------------------------------------------------------------ |
+| 01   | `int getYyy()`                            | 获取某个信息（年/月/日/时/分/秒/纳秒...）                    |
+| 02   | `DayOfWeek getDayOfWeek()`                | 获取今天是当周第几日。<br />获取星期几：`int dayOfWeek = localDate.getDayOfWeek().getValue()` |
+| 03   | `LocalXxx withYyy()`                      | 直接修改某个信息。                                           |
+| 04   | `LocalXxx plusYyy(long toAdd)`            | 为某个信息增加指定的值。                                     |
+| 05   | `LocalXxx minusYyy(long toSubstract)`     | 为某个信息减少指定的值。                                     |
+| 06   | `boolean equals(LocalXxx anotherLocal)`   | 判断该`LocalXxx`对象是否等于另一个`LocalXxx`对象。           |
+| 07   | `boolean isBefore(LocalXxx anotherLocal)` | 判断该`LocalXxx`对象是否早于另一个`LocalXxx`对象。           |
+| 08   | `boolean isAfter(LocalXxx anotherLocal)`  | 判断该`LocalXxx`对象是否晚于另一个`LocalXxx`对象。           |
+
+###### P4 三者转换方法
+
+| 序号 | 方法                                                      | 说明                                                         |
+| ---- | --------------------------------------------------------- | ------------------------------------------------------------ |
+| 01   | `LocalDate toLocalDate()`                                 | 把`LocalDateTime`对象转换成`LocalDate`对象。                 |
+| 02   | `LocalTime toLocalTime()`                                 | 把`LocalDateTime`对象转换成`LocalTime`对象。                 |
+| 03   | `static LocalDateTime of(LocalDate date, LocalTime time)` | 把`LocalDate`对象和`LocalTime`对象合并成`LocalDateTime`对象。 |
+
+
+
+---
+
+
+
+##### 16.2.3 代替`Calender`--`Zone`家族
+
+###### P1 `ZoneId`：时区ID
+
+| 序号 | 静态方法                                   | 说明                             |
+| ---- | ------------------------------------------ | -------------------------------- |
+| 01   | `static ZoneId systemDefault()`            | 获取系统默认时区ID。             |
+| 02   | `static Set<String> fetAvailableZoneIds()` | 获取Java支持的全部时区ID。       |
+| 03   | `static ZoneId of(String zoneId)`          | 把某个时区ID封装成`ZoneId`对象。 |
+
+###### P2 `ZoneDateTime`：带时区的时间
+
+> [!Tip]
+>
+> 同样支持`Local`家族的通用方法，参见[三者通用方法](######P3 三者通用方法)。
+
+| 序号 | 静态方法                                     | 说明                                   |
+| ---- | -------------------------------------------- | -------------------------------------- |
+| 01   | `static ZoneDateTime now(ZoneId zoneId)`     | 获取某个时区的`ZoneDateTime`对象。     |
+| 02   | `static ZoneDateTime now(Clock.systemUTC())` | 获取世界标准时间UTC。                  |
+| 03   | `static ZoneDateTime now()`                  | 获取系统默认时区的`ZoneDateTime`对象。 |
+
+
+
+---
+
+
+
+##### 16.2.4 代替`Date`--`Instant`
+
+###### P1 概述
+
++ `Instant`代表时间线上的某个时刻，也叫时间戳。
++ 通过获取`Instant`对象可以拿到当前时刻，该时刻由**两部分**组成：
+  + 从1970-01-01 00:00:00（*<u>计算机元年</u>*）开始走到该时刻经历的**总秒数**。
+  + 剩余的**不足1秒的纳秒数**。
++ **作用**：
+  1. 记录代码执行时间，进行代码性能分析；
+  2. 记录用户操作某个事件的时间点。
+
+###### P2 常用方法
+
+| 序号 | 方法                                                      | 说明                                                       |
+| ---- | --------------------------------------------------------- | ---------------------------------------------------------- |
+| 01   | `static Instant now()`                                    | 获取当前时刻的`Instant`对象（UTC）。                       |
+| 02   | `long getEpochSecond()`                                   | 获取从计算机元年开始走到该时刻经历的总秒数。               |
+| 03   | `int getNano()`                                           | 获取剩余的不足1秒的纳秒数。                                |
+| 04   | `Instant plusSeconds/Millis/Nanos(long toAdd)`            | 为某个信息增加指定的值。                                   |
+| 05   | `Instant minusSeconds/Millis/Nanos(long toSubstract)`     | 为某个信息减少指定的值。                                   |
+| 06   | `boolean equals/isBefore/isAfter(Instant anotherInstant)` | 判断该`Instant`对象是否等于/早于/晚于另一个`Instant`对象。 |
+
+
+
+---
+
+
+
+##### 16.2.5 代替`SimpleDateFormat`--`DateTimeFormatter`
+
+
+
+---
+
+
+
+##### 16.2.6 其它
+
+
+
+---
+
+
+
+### 17.`Arrays`
+
+
+
+
+
+
+
+###### 
