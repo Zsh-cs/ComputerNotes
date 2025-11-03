@@ -660,9 +660,9 @@ debug原因参见源码：
 
 
 
-### 10.`StringBuilder`与`StringBuffer`
+### 10A.`StringBuilder`与`StringBuffer`
 
-#### 10.1 概述
+#### 10A.1 概述
 
 + `StringBuilder`代表可变字符串对象，相当于一个容器，里面装的字符串是可以改变的。
 + `StringBuilder`就是用来操作字符串的。
@@ -670,7 +670,7 @@ debug原因参见源码：
 
 
 
-#### 10.2 构造器
+#### 10A.2 构造器
 
 | 序号 | 构造器                            | 说明                                                       |
 | ---- | --------------------------------- | ---------------------------------------------------------- |
@@ -679,7 +679,7 @@ debug原因参见源码：
 
 
 
-#### 10.3 常用方法
+#### 10A.3 常用方法
 
 | 序号 | 方法                             | 说明                                                  |
 | ---- | -------------------------------- | ----------------------------------------------------- |
@@ -690,7 +690,7 @@ debug原因参见源码：
 
 
 
-#### 10.4 使用`StringBuilder`操作字符串的优势
+#### 10A.4 使用`StringBuilder`操作字符串的优势
 
 ##### P1 原代码
 
@@ -739,14 +739,14 @@ public class Test2 {
 
 
 
-#### 10.5 `StringBuffer`
+#### 10A.5 `StringBuffer`
 
 + `StringBuffer`和`StringBuilder`的用法完全一致。
 + **区别**：`StringBuffer`是线程安全的，`StringBuilder`是线程不安全的。
 
 
 
-#### 10.6 综合案例
+#### 10A.6 综合案例
 
 + **需求**：设计一个方法，将一个整型数组的内容输出为指定格式的字符串，形如`[11, 22, 33]`。
 
@@ -789,16 +789,16 @@ public class Test2 {
 
 
 
-### 11.`StringJoiner`
+### 10B.`StringJoiner`
 
-#### 11.1 概述
+#### 10B.1 概述
 
 + `JDK8`开始才推出的新`API`，和`StringBuilder`一样也是用来操作字符串的，也可以看作是一个容器，创建之后内容可变。
 + **优势**：不仅能提高字符串的操作效率，而且在某些场景下使用它操作字符串，==代码会更简洁==，参见[11.4](####11.4 使用`StringJoiner`重新实现综合案例[10.6](####10.6 综合案例))
 
 
 
-#### 11.2 构造器
+#### 10B.2 构造器
 
 | 序号 | 构造器                                        | 说明                                                         |
 | ---- | --------------------------------------------- | ------------------------------------------------------------ |
@@ -807,7 +807,7 @@ public class Test2 {
 
 
 
-#### 11.3 常用方法
+#### 10B.3 常用方法
 
 | 序号 | 常用方法                                    | 说明                           |
 | ---- | ------------------------------------------- | ------------------------------ |
@@ -817,7 +817,7 @@ public class Test2 {
 
 
 
-#### 11.4 使用`StringJoiner`重新实现综合案例[10.6](####10.6 综合案例)
+#### 10B.4 使用`StringJoiner`重新实现综合案例[10.6](####10.6 综合案例)
 
 + **代码**：
 
@@ -857,7 +857,7 @@ public class Test2 {
 
 
 
-### 12.`Math`
+### 11.`Math`
 
 > 数学类，是一个工具类，里面提供的都是对数据进行操作的一些静态方法。
 
@@ -879,7 +879,7 @@ public class Test2 {
 
 
 
-### 13.`System`
+### 12.`System`
 
 > 代表程序所在的系统，也是一个工具类。
 
@@ -896,15 +896,15 @@ public class Test2 {
 
 
 
-### 14.`Runtime`
+### 13.`Runtime`
 
-#### 14.1 概述
+#### 13.1 概述
 
 + `Runtime`指代程序所在的运行环境，分析源码可知它是一个单例类。
 
   <img src="images/image-20251031000713342.png" alt="image-20251031000713342" style="zoom: 80%;" />
 
-#### 14.2 常用方法
+#### 13.2 常用方法
 
 | 序号 | 方法                           | 说明                                     |
 | ---- | ------------------------------ | ---------------------------------------- |
@@ -921,9 +921,9 @@ public class Test2 {
 
 
 
-### 15.`BigDecimal`
+### 14.`BigDecimal`
 
-#### 15.1 引入背景
+#### 14.1 引入背景
 
 `BigDecimal`是为了解决浮点数运算时结果失真的问题。
 
@@ -947,13 +947,13 @@ public class Test1 {
 
 
 
-#### 15.2 底层原理：为什么`BigDecimal`是精确的？
+#### 14.2 底层原理：为什么`BigDecimal`是精确的？
 
 `BigDecimal`根本不把数字存储为二进制小数。它直接存储十进制数字的每一位（作为整数），并记录小数点位置。所有的计算都是基于整数运算完成的，因此可以精确表示像 0.1和0.2这样的数。
 
 
 
-#### 15.3 构造器
+#### 14.3 构造器
 
 | 序号 | 构造器                          | 说明                                                         |
 | ---- | ------------------------------- | ------------------------------------------------------------ |
@@ -962,7 +962,7 @@ public class Test1 {
 
 
 
-#### 15.4 常用方法
+#### 14.4 常用方法
 
 | 序号 | 方法                                                  | 说明                                                         |
 | ---- | ----------------------------------------------------- | ------------------------------------------------------------ |
@@ -976,7 +976,7 @@ public class Test1 {
 
 
 
-#### 15.5 使用`BigDecimal`重构测试代码
+#### 14.5 使用`BigDecimal`重构测试代码
 
 + **代码**：
 
@@ -1002,11 +1002,11 @@ public class Test1 {
 
 
 
-### 16.日期与时间
+### 15.日期与时间
 
-#### 16.1 `JDK8`之前传统的日期与时间（不推荐，仅用于老项目维护）
+#### 15.1 `JDK8`之前传统的日期与时间（不推荐，仅用于老项目维护）
 
-##### 16.1.1 `Date`
+##### 15.1.1 `Date`
 
 > 代表日期和时间。
 
@@ -1026,7 +1026,7 @@ public class Test1 {
 
 
 
-##### 16.1.2 `SimpleDateFormat`
+##### 15.1.2 `SimpleDateFormat`
 
 > 代表简单日期格式化，可以将`Date`对象或时间戳格式化成指定形式。
 
@@ -1052,13 +1052,13 @@ public class Test1 {
 
 
 
-##### 16.1.3 练习：秒杀活动
+##### 15.1.3 练习：秒杀活动
 
 ###### P1 需求
 
 <img src="images/image-20251102184141301.png" alt="image-20251102184141301" style="zoom:67%;" />
 
-###### P2 代码实现
+###### P2 代码实现+控制台输出
 
 ```java
 import java.text.ParseException;
@@ -1105,13 +1105,11 @@ public class FlashSale {
 }
 ```
 
-###### P3 控制台
-
 <img src="images/image-20251102190512079.png" alt="image-20251102190512079" style="zoom:67%;" />
 
 
 
-##### 16.1.4 `Calendar`
+##### 15.1.4 `Calendar`
 
 > 代表此时此刻对应的日历，通过`Calendar`可以单独获取和修改`Date`对象中的年、月、日、时、分、秒等等，
 
@@ -1132,9 +1130,9 @@ public class FlashSale {
 
 
 
-#### 16.2 `JDK8`开始新增的日期与时间（推荐）
+#### 15.2 `JDK8`开始新增的日期与时间（推荐）
 
-##### 16.2.1 为什么要学习新增的日期与时间？
+##### 15.2.1 为什么要学习新增的日期与时间？
 
 + **传统日期与时间的局限性**：
   + 设计不合理，使用不方便，大多数被淘汰了。
@@ -1149,7 +1147,7 @@ public class FlashSale {
 
 
 
-##### 16.2.2 代替`Calendar`--`Local`家族
+##### 15.2.2 代替`Calendar`--`Local`家族
 
 > [!Warning]
 >
@@ -1163,12 +1161,16 @@ public class FlashSale {
 + `LocalTime`：本地时间（时、分、秒、纳秒）。
 + `LocalDateTime`：本地日期时间（年、月、日、星期、时、分、秒、纳秒）。
 
+
+
 ###### P2 获取对象的方法
 
 | 序号 | 方法                                      | 说明                                   |
 | ---- | ----------------------------------------- | -------------------------------------- |
 | 01   | `static LocalXxx now()`                   | 获取系统当前时间对应的`LocalXxx`对象。 |
 | 02   | `static LocalXxx of(param1, param2, ...)` | 获取指定时间的`LocalXxx`对象。         |
+
+
 
 ###### P3 三者通用方法
 
@@ -1182,6 +1184,8 @@ public class FlashSale {
 | 06   | `boolean equals(LocalXxx anotherLocal)`   | 判断该`LocalXxx`对象是否等于另一个`LocalXxx`对象。           |
 | 07   | `boolean isBefore(LocalXxx anotherLocal)` | 判断该`LocalXxx`对象是否早于另一个`LocalXxx`对象。           |
 | 08   | `boolean isAfter(LocalXxx anotherLocal)`  | 判断该`LocalXxx`对象是否晚于另一个`LocalXxx`对象。           |
+
+
 
 ###### P4 三者转换方法
 
@@ -1197,7 +1201,7 @@ public class FlashSale {
 
 
 
-##### 16.2.3 代替`Calender`--`Zone`家族
+##### 15.2.3 代替`Calender`--`Zone`家族
 
 ###### P1 `ZoneId`：时区ID
 
@@ -1206,6 +1210,8 @@ public class FlashSale {
 | 01   | `static ZoneId systemDefault()`            | 获取系统默认时区ID。             |
 | 02   | `static Set<String> fetAvailableZoneIds()` | 获取Java支持的全部时区ID。       |
 | 03   | `static ZoneId of(String zoneId)`          | 把某个时区ID封装成`ZoneId`对象。 |
+
+
 
 ###### P2 `ZoneDateTime`：带时区的时间
 
@@ -1225,7 +1231,7 @@ public class FlashSale {
 
 
 
-##### 16.2.4 代替`Date`--`Instant`
+##### 15.2.4 代替`Date`--`Instant`
 
 ###### P1 概述
 
@@ -1236,6 +1242,8 @@ public class FlashSale {
 + **作用**：
   1. 记录代码执行时间，进行代码性能分析；
   2. 记录用户操作某个事件的时间点。
+
+
 
 ###### P2 常用方法
 
@@ -1254,7 +1262,55 @@ public class FlashSale {
 
 
 
-##### 16.2.5 代替`SimpleDateFormat`--`DateTimeFormatter`
+##### 15.2.5 代替`SimpleDateFormat`--`DateTimeFormatter`
+
+> 日期时间格式化器，用于日期时间的格式化和解析。
+
+###### P1 `DateTimeFormatter`提供的常用方法
+
+| 序号 | 方法                                               | 说明                 |
+| ---- | -------------------------------------------------- | -------------------- |
+| 01   | `static DateTimeFormatter ofPattern(日期时间格式)` | 获取格式化器对象。   |
+| 02   | `String format(日期时间对象)`                      | 正向格式化日期时间。 |
+
+
+
+###### P2 `LocalDateTime`提供的格式化和解析日期时间的方法
+
+| 序号 | 方法                                                         | 说明                 |
+| ---- | ------------------------------------------------------------ | -------------------- |
+| 01   | `String format(DateTimeForamtter formatter)`                 | 反向格式化日期时间。 |
+| 02   | `static LocalDateTime parse(CharSequence text, DateTimeFormatter formatter)` | 解析时间。           |
+
+
+
+###### P3 代码示例+控制台输出
+
+```java
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+public class DateTimeFormatterTest {
+    public static void main(String[] args) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+
+        LocalDateTime now = LocalDateTime.now();
+        System.out.println(now);
+
+        String rs1 = formatter.format(now);// 正向格式化
+        System.out.println("rs1: " + rs1);
+
+        String rs2 = now.format(formatter);// 反向格式化
+        System.out.println("rs2: " + rs2);
+
+        String dateTimeStr = "2026/01/01 00:00:00";
+        LocalDateTime localDateTime = LocalDateTime.parse(dateTimeStr, formatter);
+        System.out.println(localDateTime);
+    }
+}
+```
+
+<img src="images/image-20251103151843311.png" alt="image-20251103151843311" style="zoom:67%;" />
 
 
 
@@ -1262,7 +1318,35 @@ public class FlashSale {
 
 
 
-##### 16.2.6 其它
+##### 15.2.6 其它
+
+###### P1 `Period`
+
+> [!Warning]
+>
+> 可以且只能用于计算两个`LocalDate`对象相差的年数、月数、日数。
+>
+> 示例：2020-01-01与2026-02-08间隔6年、<u>1月、7日</u>。
+
+| 序号 | 常用方法                                                | 说明                                        |
+| ---- | ------------------------------------------------------- | ------------------------------------------- |
+| 01   | `static Period between(LocalDate start, LocalDate end)` | 传入两个`LocalDate`对象，得到`Period`对象。 |
+| 02   | `int getYears/Months/Days()`                            | 计算并返回间隔的年数/月数/日数。            |
+
+
+
+###### P2 `Duration`
+
+> [!Caution]
+>
+> 可以用于计算两个日期时间对象（包括`LocalTime, LocalDateTime, Instant`）相差的日数、小时数、分钟数、秒数、毫秒数、纳秒数。
+>
+> 示例：2026-01-01 00:00:00与2026-02-08 12:30:30间隔38日、924小时、55470分钟、3328230秒。
+
+| 序号 | 常用方法                                                     | 说明                                                    |
+| ---- | ------------------------------------------------------------ | ------------------------------------------------------- |
+| 01   | `static Duration between(日期时间对象 start, 日期时间对象 end)` | 传入两个日期时间对象对象，得到`Duration`对象。          |
+| 02   | `long toDays/Hours/Minutes/Seconds/Millis/Nanos()`           | 计算并返回间隔的日数/小时数/分钟数/秒数/毫秒数/纳秒数。 |
 
 
 
@@ -1270,12 +1354,325 @@ public class FlashSale {
 
 
 
-### 17.`Arrays`
+### 16A.`Arrays`
+
+> 用来操作数组的一个工具类。
+>
+
+#### 16A.1 常用方法
+
+| 序号 | 方法                                                         | 说明                                                         |
+| ---- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 01   | `static String toString(类型[] arr)`                         | 返回数组内容。                                               |
+| 02   | `static int[] copyOfRange(类型[] arr, int startIndex, int endIndex)` | 按指定范围将原数组拷贝到新数组，包前不包后。                 |
+| 03   | `static copyOf(类型[] arr, int newLength)`                   | 将原数组拷贝到新数组  ，同时可指定新数组的长度，即数组扩容。 |
+| 04   | `static setAll(double[] arr, IntToDoubleFunction generator)` | 把数组中的原数据修改为新数据。                               |
+| 05   | `static void sort(类型[] arr)`                               | 对数组进行排序（默认升序）。                                 |
+
+
+
+#### 16A.2 04方法演示
+
+##### P1 需求
+
+把一个数组`prices`存储的所有价格数据都打8折，然后存回去。
+
+##### P2 代码实现+控制台输出
+
+**注意**：实际上04方法`static setAll(double[] arr, IntToDoubleFunction generator)`的第2个形参是要我们传入一个临时新建的匿名内部类。
+
+```java
+import java.util.Arrays;
+import java.util.function.IntToDoubleFunction;
+
+public class Test1 {
+    public static void main(String[] args) {
+        double[] prices = {99.8, 128, 100};
+        System.out.println("原价：" + Arrays.toString(prices));
+        
+        Arrays.setAll(prices, new IntToDoubleFunction() {
+            @Override
+            public double applyAsDouble(int value) {// value即数组索引
+                return prices[value] * 0.8;
+            }
+        });
+        System.out.println("折后价：" + Arrays.toString(prices));
+    }
+}
+
+```
+
+<img src="images/image-20251103160827858.png" alt="image-20251103160827858" style="zoom:67%;" />
+
+##### P3 结合`Lambda`表达式简化代码实现
+
+```java
+import java.util.Arrays;
+import java.util.function.IntToDoubleFunction;
+
+public class Test1 {
+    public static void main(String[] args) {
+        double[] prices = {99.8, 128, 100};
+        System.out.println("原价：" + Arrays.toString(prices));
+
+        Arrays.setAll(prices, (value) -> {
+            return prices[value] * 0.8;
+        });
+        System.out.println("折后价：" + Arrays.toString(prices));
+    }
+}
+```
+
+
+
+---
+
+
+
+### 16B.`Comparable`与`Comparator`
+
+#### 16B.1 引入背景
+
+如果数组中存储的是对象，我们应该如何排序？
+
+新建一个实体类(`JavaBean`)--`Student`类：
+
+```java
+package arrays;
+
+public class Student {
+    private String name;
+    private double height;
+    private int age;
+    
+    public Student(String name, double height, int age) {
+        this.name = name;
+        this.height = height;
+        this.age = age;
+    }
+
+    // 省略getter&setter
+}
+```
+
+然后在`Test`类中尝试使用`Arrays`的05排序方法对一个`Student`数组进行排序，参见[17.1 常用方法](####17.1 常用方法)。
+
+```java
+package arrays;
+
+import java.util.Arrays;
+
+public class Test {
+    public static void main(String[] args) {
+        Student[] students = new Student[4];
+        students[0] = new Student("Zsh", 173.5, 20);
+        students[1] = new Student("Zjl", 178.0, 19);
+        students[2] = new Student("Zxj", 161.5, 15);
+        students[3] = new Student("Czb", 188.8, 15);
+
+        Arrays.sort(students);
+    }
+}
+```
+
+运行上述代码后，控制台输出如下：
+
+<img src="images/image-20251103162858166.png" alt="image-20251103162858166" style="zoom:67%;" />
+
+可以看到代码直接报错，说明这种方法不能直接对存储了对象的数组进行排序，原因是没有指定具体的排序规则，Java不知道如何进行排序，因此我们引入了`Comparable`与`Comparator`，用于自定义排序规则。
+
+
+
+---
+
+
+
+#### 16B.2 `Comparable`
+
+> [!Tip]
+>
+> 让实体类实现`Comparable<T>`这个泛型接口，然后重写`compareTo`方法，自定义比较规则。这时候再用`Arrays`的05排序方法即可以成功对`Student`数组进行排序了。
+
+##### P0 `compareTo`方法使用指南
+
++ **入门**：
+
+```java
+/**
+ * @param o the object to be compared.
+ *
+ * 自定义比较规则：this 和 T o 进行比较
+ * 升序情况下：
+ * 若想要 this>o ，则返回正整数；
+ * 若想要 this<o ，则返回负整数；
+ * 若想要 this=o ，则返回0。
+ *
+ * 降序情况下：
+ * 若想要 this>o ，则返回负整数；
+ * 若想要 this<o ，则返回整整数；
+ * 若想要 this=o ，则返回0。
+ */
+@Override
+public int compareTo(T o) {
+    if(this.param > o.param){
+        return ...;
+    } else if(this.param < o.param){
+        return ...;
+    } else{
+        return 0;
+    }
+}
+```
+
++ **进阶**（开发中更推荐，但要注意只适用于`param`是`int`类型的情况，其他情况下仍然按照入门指南编码，防止bug）：
+
+```java
+/**
+ * @param o the object to be compared.
+ *
+ * 自定义比较规则：this 和 T o 进行比较
+ * 升序情况下：return this.param - o.param;
+ * 降序情况下：return o.param - this.param;
+ * 简记：升序this在前，降序this在后
+ */
+@Override
+public int compareTo(T o) {
+    return this.param - o.param;// 升序
+}
+```
+
+
+
+##### P1 修改`Student`实体类
+
+```java
+package arrays;
+
+public class Student implements Comparable<Student> {
+    private String name;
+    private double height;
+    private int age;
+
+    public Student(String name, double height, int age) {
+        this.name = name;
+        this.height = height;
+        this.age = age;
+    }
+
+    @Override
+    public int compareTo(Student o) {
+        return this.age - o.age;// 按年龄升序
+    }
+
+    @Override
+    public String toString() {
+        return "name: "+name+", height: "+height+", age: "+age+";";
+    }
+    
+    // 省略getter&setter   
+}
+```
+
+
+
+##### P2 修改`Test`类
+
+```java
+package arrays;
+
+import java.util.Arrays;
+import java.util.StringJoiner;
+
+public class Test {
+    public static void main(String[] args) {
+        Student[] students = new Student[4];
+        students[0] = new Student("Zsh", 173.5, 20);
+        students[1] = new Student("Zjl", 178.0, 19);
+        students[2] = new Student("Zxj", 161.5, 15);
+        students[3] = new Student("Czb", 188.8, 15);
+
+        Arrays.sort(students);
+        String[] sortedStudents=Arrays.toString(students).split(";");
+        for (String sortedStudent : sortedStudents) {
+            System.out.println(sortedStudent);
+        }
+    }
+}
+```
+
+
+
+##### P3 控制台（按年龄升序）
+
+<img src="images/image-20251103170819121.png" alt="image-20251103170819121" style="zoom:67%;" />
+
+
+
+---
+
+
+
+#### 16B.3 `Comparator`
+
+> [!Tip]
+>
+> 使用`Arrays`类提供的重载方法`static <T> void sort(T[] arr, Comparator<? super T> comparator)`，传入待排序数组和一个`Comparator`接口的匿名内部类对象，然后自定义比较规则。
+
+##### P1 修改`Test`类
+
+```java
+package arrays;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.StringJoiner;
+
+public class Test {
+    public static void main(String[] args) {
+        Student[] students = new Student[4];
+        students[0] = new Student("Zsh", 173.5, 20);
+        students[1] = new Student("Zjl", 178.0, 19);
+        students[2] = new Student("Zxj", 161.5, 15);
+        students[3] = new Student("Czb", 188.8, 15);
+
+        // 可用Lambda表达式简化，此处为了增强可读性不使用
+        Arrays.sort(students, new Comparator<Student>() {// 按身高升序，遵照入门指南
+            @Override
+            public int compare(Student o1, Student o2) {
+                if (o1.getHeight() > o2.getHeight()) {
+                    return 1;
+                } else if (o1.getHeight() < o2.getHeight()) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        });
+        
+        String[] sortedStudents = Arrays.toString(students).split(";");
+        for (String sortedStudent : sortedStudents) {
+            System.out.println(sortedStudent);
+        }
+    }
+}
+```
+
+##### P2 控制台（按身高升序）
+
+<img src="images/image-20251103172816946.png" alt="image-20251103172816946" style="zoom:67%;" />
+
+##### P3 使用`Double`包装 类提供的`compare`方法简化上述代码
+
+```java
+Arrays.sort(students, new Comparator<Student>() {
+    @Override
+    public int compare(Student o1, Student o2) {
+        return Double.compare(o1.getHeight(), o2.getHeight());
+    }
+});
+```
 
 
 
 
 
-
-
-###### 
