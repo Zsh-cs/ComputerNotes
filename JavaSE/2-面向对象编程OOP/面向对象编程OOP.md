@@ -729,7 +729,7 @@ p2.run();//行为多态
 
 
 
-##### 5.4.2 `Lambda`表达式(After `JDK8`)
+##### 5.4.2 `Lambda`表达式(JDK8新特性)
 
 > [!Tip]
 >
@@ -2046,5 +2046,353 @@ public E get(int index){//此处的E是返回值类型而非带尖括号的类�
 + 泛型不支持基本数据类型，只支持对象类型（引用数据类型）。
   + `int`要用`Integer`代替；
   + `double`要用`Double`代替。
+
+
+
+---
+
+
+
+## 十、方法引用(JDK8新特性)
+
+> [!Tip]
+>
+> 在阅读本节前，请先充分理解[5.4.2 `Lambda`表达式](#####5.4.2 `Lambda`表达式(JDK8新特性))。
+>
+> 方法引用的标志性符号是 :: 。
+
+### 0.原始代码
+
++ `Student`实体类：
+
+  ```java
+  package method_references;
+  
+  public class Student {
+      private String name;
+      private double height;
+      private int age;
+  
+      public Student(String name, double height, int age) {
+          this.name = name;
+          this.height = height;
+          this.age = age;
+      }
+  
+      @Override
+      public String toString() {
+          return "name: "+name+", height: "+height+", age: "+age+";";
+      }
+  
+      // 省略getter&setter
+  }
+  ```
+
++ `Test`类：
+
+  ```java
+  package method_references;
+  
+  import java.util.Arrays;
+  import java.util.Comparator;
+  import java.util.StringJoiner;
+  
+  public class Test {
+      public static void main(String[] args) {
+          Student[] students = new Student[4];
+          students[0] = new Student("Zsh", 173.5, 20);
+          students[1] = new Student("Zjl", 178.0, 19);
+          students[2] = new Student("Zxj", 161.5, 15);
+          students[3] = new Student("Czb", 188.8, 15);
+  
+          // 使用Lambda简化后的形式
+         	Arrays.sort(students, (o1, o2) -> o1.getAge() - o2.getAge());
+  
+          String[] sortedStudents = Arrays.toString(students).split(";");
+          for (String sortedStudent : sortedStudents) {
+              System.out.println(sortedStudent);
+          }
+      }
+  }
+  ```
+
+
+
+---
+
+
+
+### 1.静态方法的引用
+
+#### 1.1 概述
+
++ **格式**：`类名::静态方法`。
++ **使用场景**：如果某个`Lambda`表达式里只是调用一个静态方法，并且前后参数形式一致，就可以使用静态方法引用。
+
+#### 1.2 使用静态方法引用重构原始代码
+
+##### P1 新建学生比较器`StudentComparator`
+
+```java
+package method_references;
+
+public class StudentComparator {
+    public static int compareByAge(Student o1, Student o2) {
+        return o1.getAge() - o2.getAge();
+    }
+}
+```
+
+##### P2 简化`Test`类代码
+
+原始代码是这样的：
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        // ...
+
+        // 使用Lambda简化后的形式
+       	Arrays.sort(students, (o1, o2) -> o1.getAge() - o2.getAge());
+
+        // ...
+    }
+}
+```
+
+我们主要针对第6行的`Lambda`表达式进行简化，简化后的代码如下：
+
+```java
+Arrays.sort(students, (o1, o2) -> StudentComparator.compareByAge(o1, o2));
+```
+
+由于该`Lambda`表达式只是调用一个静态方法，并且前后参数形式一致，都是`(o1,o2)`，所以可以使用**静态方法引用**进行更进一步的简化：
+
+```java
+Arrays.sort(students, StudentComparator::compareByAge);
+```
+
+
+
+---
+
+
+
+### 2.实例方法的引用
+
+#### 2.1 概述
+
++ **格式**：`对象名::实例方法`。
++ **使用场景**：如果某个`Lambda`表达式里只是调用一个实例方法，并且前后参数形式一致，就可以使用实例方法引用。
+
+#### 2.2 使用实例方法引用重构原始代码
+
+##### P1 在`StudentComparator`类中新增一个实例方法`compareByAgeDesc`
+
+```java
+package method_references;
+
+public class StudentComparator {
+    public static int compareByAge(Student o1, Student o2) {
+        return o1.getAge() - o2.getAge();
+    }
+
+    // 按年龄降序
+    public int compareByAgeDesc(Student o1, Student o2) {
+        return o2.getAge() - o1.getAge();
+    }
+}
+```
+
+##### P2 简化`Test`类代码
+
+原始代码是这样的：
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        // ...
+
+        // 使用Lambda简化后的形式
+       	Arrays.sort(students, (o1, o2) -> o2.getAge() - o1.getAge());
+
+        // ...
+    }
+}
+```
+
+我们主要针对第6行的`Lambda`表达式进行简化，简化后的代码如下：
+
+```java
+StudentComparator comparator = new StudentComparator();
+Arrays.sort(students, (o1, o2) -> comparator.compareByAgeDesc(o1, o2));
+```
+
+由于该`Lambda`表达式只是调用一个实例方法，并且前后参数形式一致，都是`(o1,o2)`，所以可以使用**实例方法引用**进行更进一步的简化：
+
+```java
+Arrays.sort(students, comparator::compareByAgeDesc);
+```
+
+
+
+---
+
+
+
+### 3.特定类型方法的引用
+
+#### 3.1 概述
+
++ **格式**：`类名::方法`。
++ **使用场景**：如果某个`Lambda`表达式只是调用一个实例方法，并且前面参数列表中的第一个参数是作为方法的主调，后面几个参数都是作为该实例方法的入参，那么此时就可以使用特定类型方法的引用。
+
+#### 3.2 代码演示
+
+##### P1 原代码+控制台输出
+
+```java
+package method_references;
+
+import java.util.Arrays;
+
+public class Test2 {
+    public static void main(String[] args) {
+        String[] names = {"Arthur", "bob", "Ben", "David", "green", "jack", "Lily", "Oliver"};
+
+        // 默认按照字符串的字典序进行升序，且大写在前，小写在后
+        Arrays.sort(names);
+        System.out.println(Arrays.toString(names));
+    }
+}
+```
+
+<img src="images/image-20251103224003215.png" alt="image-20251103224003215" style="zoom:67%;" />
+
+##### P2 需求：忽略首字符大小写进行排序
+
+```java
+package method_references;
+
+import java.util.Arrays;
+import java.util.Comparator;
+
+public class Test2 {
+    public static void main(String[] args) {
+        String[] names = {"Arthur", "bob", "Ben", "David", "green", "jack", "Lily", "Oliver"};
+
+        // 要求忽略首字符大小写进行排序
+        Arrays.sort(names, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.compareToIgnoreCase(o2);// 忽略首字符大小写
+            }
+        });
+        System.out.println(Arrays.toString(names));
+    }
+}
+```
+
+<img src="images/image-20251103224654545.png" alt="image-20251103224654545" style="zoom:67%;" />
+
+##### P3 使用`Lambda`简化
+
+```java
+Arrays.sort(names, (o1, o2) -> o1.compareToIgnoreCase(o2));
+```
+
+##### P4 使用特定类型方法的引用继续简化
+
+由于该`Lambda`表达式只是调用一个实例方法，并且前面参数列表中的第一个参数`o1`是作为`compareToIgnoreCase`方法的主调，第二个参数`o2`是作为`compareToIgnoreCase`的入参，所以此时可以使用特定类型方法的引用：
+
+```java
+Arrays.sort(names, String::compareToIgnoreCase);
+```
+
+
+
+---
+
+
+
+### 4.构造器引用
+
+#### 4.1 概述
+
++ **格式**：`类名::new`。
++ **使用场景**：如果某个`Lambda`表达式只是在创建对象，并且前后参数形式一致，那么可以使用构造器引用。
+
+#### 4.2 代码演示
+
+##### P1 新建`Car`实体类
+
+```java
+package method_references;
+
+public class Car {
+    private String name;
+    private double price;
+
+    public Car() {}
+
+    public Car(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
+    
+    @Override
+    public String toString() {
+        return "Car{" +
+                "name='" + name + '\'' +
+                ", price=" + price +
+                '}';
+    }
+
+    // 省略getter&setter
+}
+```
+
+##### P2 新建`Test3`类和`CarFactory`接口
+
+```java
+package method_references;
+
+public class Test3 {
+    public static void main(String[] args) {
+        // 创建CarFactory接口的匿名内部类对象
+        CarFactory carFactory = new CarFactory() {
+            @Override
+            public Car createCar(String name, double price) {
+                return new Car(name, price);
+            }
+        };
+        Car honda = carFactory.createCar("Honda", 19.9);
+        System.out.println(honda);
+    }
+}
+
+interface CarFactory {
+    Car createCar(String name, double price);
+}
+```
+
+<img src="images/image-20251103230822290.png" alt="image-20251103230822290" style="zoom: 67%;" />
+
+##### P3 使用`Lambda`简化
+
+```java
+CarFactory carFactory = (name, price) -> new Car(name, price);
+```
+
+##### P4 使用构造器引用继续简化
+
+由于该`Lambda`表达式只是在创建对象，并且前后参数形式一致，都是`(name, price)`，所以可以使用构造器引用：
+
+```java
+CarFactory carFactory = Car::new;
+```
+
+
+
 
 
