@@ -1661,7 +1661,7 @@ public class Test {
 
 <img src="images/image-20251103172816946.png" alt="image-20251103172816946" style="zoom:67%;" />
 
-##### P3 使用`Double`包装 类提供的`compare`方法简化上述代码
+##### P3 使用`Double`包装类提供的`compare`方法简化上述代码
 
 ```java
 Arrays.sort(students, new Comparator<Student>() {
