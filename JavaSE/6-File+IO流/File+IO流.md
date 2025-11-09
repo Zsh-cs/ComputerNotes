@@ -102,7 +102,7 @@ for(File file : files){
 
 使用`listFiles`方法时的注意事项如下：
 
-<img src="C:\Users\asus\AppData\Roaming\Typora\typora-user-images\image-20240910231737108.png" alt="image-20240910231737108" style="zoom: 80%;" />
+<img src="images/image-20240910231737108.png" alt="image-20240910231737108" style="zoom:80%;" />
 
 
 
