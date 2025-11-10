@@ -6,7 +6,7 @@
 
 ### 1.API文档
 
-+ [JDK21-Docs](..\JDK21-Docs\index.html)
++ [JDK21-Docs](../JDK21-Docs/index.html)
 
 
 
