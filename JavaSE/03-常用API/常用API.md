@@ -6,7 +6,7 @@
 
 ### 1.API文档
 
-+ [JDK21-Docs](D:\ZSH-ComputerScience\Java-BackEnd\Java\JDK21-Docs\jdk-21.0.6_doc-all\docs\index.html)
++ [JDK21-Docs](D:\ZSH-ComputerScience\ComputerNotes\JavaSE\JDK21-Docs\index.html)
 
 
 
