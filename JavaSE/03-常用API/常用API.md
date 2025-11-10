@@ -1,5 +1,11 @@
 # 常用API
 
+> 鸣谢：黑马程序员
+>
+> ![image-20251110174934854](images/image-20251110174934854.png)
+
+
+
 > [!IMPORTANT]
 >
 > API：Application Programming Interface，应用程序编程接口。
