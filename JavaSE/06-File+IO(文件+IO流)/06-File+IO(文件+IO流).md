@@ -4,7 +4,23 @@
 >
 > ![image-20251110175058397](images/image-20251110175058397.png)
 
+> [!TIP]
+>
+> Previous Chapter(上一章)：05-Collection Framework(集合框架)
+>
+> + [Markdown](../05-Collection Framework(集合框架)/05-Collection Framework(集合框架).md)
+> + [PDF](../05-Collection Framework(集合框架)/05-Collection Framework(集合框架).pdf)
+> + [HTML](../05-Collection Framework(集合框架)/05-Collection Framework(集合框架).html)
+>
+> Next Chapter(下一章)：07-Speciall Files+Logs(特殊文件+日志技术)
+>
+> + [Markdown](../07-Speciall Files+Logs(特殊文件+日志技术)/07-Speciall Files+Logs(特殊文件+日志技术).md)
+> + [PDF](../07-Speciall Files+Logs(特殊文件+日志技术)/07-Speciall Files+Logs(特殊文件+日志技术).pdf)
+> + [HTML](../07-Speciall Files+Logs(特殊文件+日志技术)/07-Speciall Files+Logs(特殊文件+日志技术).html)
 
+
+
+[TOC]
 
 ### 一、File
 

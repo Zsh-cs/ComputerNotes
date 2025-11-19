@@ -4,7 +4,23 @@
 >
 > <img src="images/image-20251110174513403.png" alt="image-20251110174513403"  />
 
+> [!TIP]
+>
+> Previous Chapter(上一章)：07-Speciall Files+Logs(特殊文件+日志技术)
+>
+> + [Markdown](../07-Speciall Files+Logs(特殊文件+日志技术)/07-Speciall Files+Logs(特殊文件+日志技术).md)
+> + [PDF](../07-Speciall Files+Logs(特殊文件+日志技术)/07-Speciall Files+Logs(特殊文件+日志技术).pdf)
+> + [HTML](../07-Speciall Files+Logs(特殊文件+日志技术)/07-Speciall Files+Logs(特殊文件+日志技术).html)
+>
+> Next Chapter(下一章)：09-Network Communication(网络通信)
+>
+> + [Markdown](../09-Network Communication(网络通信)/09-Network Communication(网络通信).md)
+> + [PDF](../09-Network Communication(网络通信)/09-Network Communication(网络通信).pdf)
+> + [HTML](../09-Network Communication(网络通信)/09-Network Communication(网络通信).html)
 
+
+
+[TOC]
 
 ## 一、概述
 

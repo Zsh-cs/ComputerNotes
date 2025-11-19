@@ -4,6 +4,24 @@
 >
 > ![image-20251110174934854](images/image-20251110174934854.png)
 
+> [!TIP]
+>
+> Previous Chapter(上一章)：02-OOP(面向对象编程)
+>
+> + [Markdown](../02-OOP(面向对象编程)/02-OOP(面向对象编程).md)
+> + [PDF](../02-OOP(面向对象编程)/02-OOP(面向对象编程).pdf)
+> + [HTML](../02-OOP(面向对象编程)/02-OOP(面向对象编程).html)
+>
+> Next Chapter(下一章)：04-Exception(异常)
+>
+> + [Markdown](../04-Exception(异常)/04-Exception(异常).md)
+> + [PDF](../04-Exception(异常)/04-Exception(异常).pdf)
+> + [HTML](../04-Exception(异常)/04-Exception(异常).html)
+
+
+
+[TOC]
+
 
 
 > [!IMPORTANT]
