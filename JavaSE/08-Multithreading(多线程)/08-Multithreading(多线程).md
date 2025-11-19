@@ -1,0 +1,1384 @@
+# 08-Multithreading(多线程)
+
+> 鸣谢：黑马程序员
+>
+> <img src="images/image-20251110174513403.png" alt="image-20251110174513403"  />
+
+
+
+## 一、概述
+
++ **线程(Thread)**：是一个程序内部的一条执行流程。
++ **单线程程序**：如果一个程序内部只有一条执行流程，则称这个程序是一个单线程程序。
++ **多线程**：是指从软硬件上实现的多条执行流程的技术（多条线程由CPU负责调度执行）。 
+
+
+
+---
+
+
+
+## 二、创建多线程
+
+> [!IMPORTANT]
+>
+> `java.lang.Thread`类代表线程。
+
+### 2.0 注意事项
+
++ 启动线程必须调用`start`方法，而非`run`方法。
+  + 直接调用`run`方法会被当成普通方法执行，此时相当于还是单线程程序。
+  + 只有调用`start`方法才是启动一个新的线程执行。
++ 不要把主线程任务放在启动子线程之前，否则会导致主线程任务执行完毕后才启动子线程，失去了多线程的意义。
+
+
+
+---
+
+
+
+### 2.1 创建方式1：继承`Thread`类
+
+#### P1 步骤
+
+1. 创建一个子类`MyThread`并继承`Thread`类；
+2. 重写`run()`方法；
+3. 创建子类的实例对象；
+4. 调用线程对象的`start()`方法启动线程，`start()`方法内部会去调用子类重写的`run()`方法。
+
+
+
+#### P2 代码演示
+
++ `ThreadTest1`类：
+
+  ```java
+  package create_thread;
+  
+  public class ThreadTest1 {
+      // main方法是由主线程负责执行的
+      public static void main(String[] args) {
+  
+          Thread t = new MyThread();
+          // 启动后，实现了多线程：主线程 + t线程
+          t.start();// start会去调用子类重写的run方法
+  
+          for (int i = 0; i < 10; i++) {
+              System.out.println("Main Thread output: " + i);
+          }
+      }
+  }
+  ```
+
++ `MyThread`类：
+
+  ```java
+  public class MyThread extends Thread {
+      @Override
+      public void run() {
+          for (int i = 0; i < 10; i++) {
+              System.out.println("child--My Thread output: " + i);
+          }
+      }
+  }
+  ```
+  
++ 控制台输出（每次输出结果都不同，仅截取其中某一次）：
+
+  ![image-20251109175231133](images/image-20251109175231133.png)
+
+
+
+#### P3 优缺点
+
++ **优点**：编码简单。
++ **缺点**：子线程类已经继承了`Thread`类，无法再继承其他类，不利于后续功能扩展。
+
+
+
+---
+
+
+
+### 2.2 创建方式2：实现`Runnable`接口
+
+#### P1 步骤
+
+1. 创建一个线程任务类`MyRunnable`并实现`Runnable`接口；
+2. 重写`run()`方法；
+3. 把`MyRunnable`线程任务对象作为参数传递给`Thread`的一个有参构造器，从而生成一个线程对象；
+4. 调用该线程对象的`start()`方法启动线程。
+
+
+
+#### P2 代码演示
+
++ `ThreadTest2`类：
+
+  ```java
+  public class ThreadTest2 {
+      public static void main(String[] args) {
+          Runnable target = new MyRunnable();
+          new Thread(target).start();
+  
+          for (int i = 0; i < 10; i++) {
+              System.out.println("Main Thread output: " + i);
+          }
+      }
+  }
+  ```
+
++ `MyRunnable`类：
+
+  ```java
+  public class MyRunnable implements Runnable {
+      @Override
+      public void run() {
+          for (int i = 0; i < 10; i++) {
+              System.out.println("child--My Runnable output: " + i);
+          }
+      }
+  }
+  ```
+
++ 控制台输出（每次输出结果都不同，仅截取其中某一次）：
+
+  ![image-20251109234522217](images/image-20251109234522217.png)
+
+
+
+#### P3 优缺点
+
++ **优点**：线程任务类只是实现接口，可以继续继承其它类，实现其它接口，扩展性强。
++ **缺点**：需要额外创建一个`Runnable`对象。
+
+
+
+#### P4 使用匿名内部类简化上述代码
+
+```java
+public class ThreadTest2_2 {
+    public static void main(String[] args) {
+        // Lambda表达式
+        Runnable target = (() -> {
+            for (int i = 0; i < 10; i++) {
+                System.out.println("child output: " + i);
+            }
+        });
+        new Thread(target).start();
+    }
+}
+```
+
+
+
+---
+
+
+
+### 2.3 创建方式3：利用`Callable`接口和`FutureTask`类
+
+#### P0 引入背景
+
+前两种创建方式都存在一个问题：假如线程执行完毕后有一些数据需要返回，由于`run()`方法的返回值为空，所以均不能直接返回结果。
+
+因此，`JDK5.0`提供了`Callable`接口和`FutureTask`类来解决这个问题。
+
+
+
+#### P1 步骤
+
+1. 创建一个类`MyCallable`并实现`Callable`接口；
+2. 重写`call`方法，封装线程任务和要返回的数据；
+3. 把`Callable`对象封装成`FutureTask`对象（线程任务对象）。
+4. 把该线程任务对象作为参数传递给`Thread`的一个有参构造器，从而生成一个线程对象；
+5. 调用该线程对象的`start()`方法启动线程；
+6. 线程执行完毕后，可以通过`FutureTask`对象的`get()`方法去获取线程任务的执行结果。
+
+> [!TIP]
+>
+> 可以采用匿名内部类简化步骤。
+
+
+
+#### P2 代码演示
+
++ `ThreadTest3`类：
+
+  ```java
+  import java.util.concurrent.Callable;
+  import java.util.concurrent.FutureTask;
+  
+  public class ThreadTest3 {
+      private static int n = 100;
+  
+      public static void main(String[] args) throws Exception {
+  
+          Callable<String> myCallable = (() -> {
+              int sum = 0;
+              for (int i = 1; i <= n; i++) {
+                  sum += i;
+              }
+              return "child calculate the sum from 1 to " + n + ": " + sum;
+          });
+  
+          FutureTask<String> futureTask = new FutureTask<>(myCallable);
+          new Thread(futureTask).start();
+  
+          String result = futureTask.get();
+          System.out.println(result);
+      }
+  }
+  ```
+
++ 控制台输出：
+
+  ![image-20251110003512657](images/image-20251110003512657.png)
+
+  
+
+#### P3 优缺点
+
++ **优点**：
+  + 线程任务类只是实现接口，可以继续继承其它类，实现其它接口，扩展性强。
+  + 可以在线程执行完毕后获取到线程的执行结果。
++ **缺点**：编码相对复杂一些。
+
+
+
+---
+
+
+
+## 三、`Thread`类的常用API
+
+### 3.1 常用构造器
+
+| 序号 | 构造器                                        | 说明                                               |
+| ---- | --------------------------------------------- | -------------------------------------------------- |
+| 01   | `public Thread(String name)`                  | 创建一个指定名称的线程对象。                       |
+| 02   | `public Thread(Runnable target)`              | 封装`Runnable`对象成为线程对象。                   |
+| 03   | `public Thread(Runnable target, String name)` | 封装`Runnable`对象成为线程对象，同时指定线程名称。 |
+
+### 3.2 常用方法
+
+| 序号 | 方法                            | 说明                                                         |
+| ---- | ------------------------------- | ------------------------------------------------------------ |
+| 01   | `void run()`                    | 线程的任务方法。                                             |
+| 02   | `void start()`                  | 启动线程。                                                   |
+| 03   | `String getName()`              | 获取当前线程名称，默认是`Thread-索引`。                      |
+| 04   | `void setName(String name)`     | 为线程设置名称，建议在启动线程之前。                         |
+| 05   | `static Thread currentThread()` | 获取当前执行的线程对象。                                     |
+| 06   | `static void sleep(long time)`  | 让当前执行的线程休眠一定毫秒数后，再继续执行。               |
+| 07   | `final void join()`             | 调用此方法的线程会优先执行完毕，合理使用此方法可以安排线程执行顺序。 |
+
+
+
+---
+
+
+
+## 四、线程安全
+
+### 4.1 线程安全问题
+
++ 多个线程同时访问并修改同一个共享资源时，可能会出现业务安全问题。
++ 比如A、B线程同时使用打印机，会导致打印出的内容混杂错乱。
+
+
+
+### 4.2 用程序模拟线程安全问题
+
+#### P1 需求
+
+小明和小红是一对夫妻，他们有一个共同银行账户Account1，余额是10万元，现在模拟二人同时取出10万元的操作。
+
+#### P2 代码演示
+
++ `Account`:
+
+  ```java
+  /**
+   * 账户类，代表小明和小红的共同银行账户
+   * 单例模式
+   */
+  public class Account {
+      private double money;// 账户余额
+  
+      private static Account account = new Account(100000);
+      private Account(double money) {
+          this.money = money;
+      }
+      public static Account getAccount() {
+          return account;
+      }
+  
+      public void drawMoney(double moneyToDraw) {
+          String threadName = Thread.currentThread().getName();
+          if (money >= moneyToDraw) {
+              System.out.println(threadName + moneyToDraw + "成功！");
+              money -= moneyToDraw;
+              System.out.println(threadName + "后，余额变更为：" + money);
+          } else {
+              System.out.println(threadName + "：余额不足！");
+          }
+      }
+  
+      public double getMoney() {
+          return money;
+      }
+      public void setMoney(double money) {
+          this.money = money;
+      }
+  }
+  ```
+
++ `CashWithdrawalThread`:
+
+  ```java
+  /**
+   * 取钱线程类
+   */
+  public class CashWithdrawalThread extends Thread {
+      private Account account;
+  
+      public CashWithdrawalThread(String name, Account account) {
+          super(name);
+          this.account = account;
+      }
+  
+      @Override
+      public void run() {
+          // 取钱
+          account.drawMoney(100000);
+      }
+  }
+  ```
+
++ `Test`:
+
+  ```java
+  public class Test {
+      public static void main(String[] args) {
+          Account account = Account.getAccount();
+          Thread xiaoMing = new CashWithdrawalThread("小明取钱", account);
+          Thread xiaoHong = new CashWithdrawalThread("小红取钱", account);
+          xiaoMing.start();
+          xiaoHong.start();
+      }
+  }
+  ```
+
+#### P3 控制台输出（每次输出结果都不同，仅截取其中某一次）
+
+![image-20251110014856418](images/image-20251110014856418.png)
+
+
+
+---
+
+
+
+## 五、线程同步
+
+### 5.1 线程同步思想
+
++ 让多个线程实现按顺序访问同一个共享资源，这样就解决了线程安全问题。
+
+
+
+### 5.2 线程同步的常见方案
+
+> [!IMPORTANT]
+>
+> **加锁与解锁**：每次只允许一个线程加锁，加锁后才能访问共享资源，访问完毕后自动解锁，然后其它线程才能再加锁进来。
+>
+> **参考案例**：[<u>4.2 用程序模拟线程安全问题</u>](###4.2 用程序模拟线程安全问题)。
+
+#### 5.2.1 同步代码块
+
+##### P1 概述
+
++ **格式**：
+
+  ```java
+  synchronized(同步锁){
+      // 访问共享资源的核心代码
+  }
+  ```
+
++ **作用**：将访问共享资源的核心代码块加锁，从而保证线程安全。
+
++ **原理**：每次只允许一个线程加锁后进入，执行完毕后自动解锁，其它线程才可以再次加锁后进入。
+
++ **同步锁的注意事项**：对于当前同时执行的线程来说，同步锁必须是同一把（同一个对象），否则会出bug。
+
+##### P2 重构`Account`类
+
+```java
+/**
+ * 账户类，代表小明和小红的共同银行账户
+ * 单例模式
+ */
+public class Account {
+    private double money;// 账户余额
+
+    private static Account account = new Account(100000);
+    private Account(double money) {
+        this.money = money;
+    }
+    public static Account getAccount() {
+        return account;
+    }
+
+    public void drawMoney(double moneyToDraw) {
+        String threadName = Thread.currentThread().getName();
+        
+        // 同步代码块
+        synchronized ("Zsh") {// 由于"Zsh"在程序中只有一份，因此可以作为同一把锁
+            if (money >= moneyToDraw) {
+                System.out.println(threadName + moneyToDraw + "成功！");
+                money -= moneyToDraw;
+                System.out.println(threadName + "后，余额变更为：" + money);
+            } else {
+                System.out.println(threadName + "：余额不足！");
+            }
+        }
+    }
+
+    public double getMoney() {
+        return money;
+    }
+    public void setMoney(double money) {
+        this.money = money;
+    }
+}
+```
+
+##### P3 控制台输出
+
+![image-20251110150353160](images/image-20251110150353160.png)
+
+##### P4 上述代码存在的问题
+
+假如有了新需求：小黑和小白是零一对夫妻，他们也有一个共同银行账户Account2，余额是10万元，现在同样想要模拟二人同时取出10万元的操作。
+
+这时候，以下代码就暴露出了问题：  
+
+```java
+public void drawMoney(double moneyToDraw) {
+	String threadName = Thread.currentThread().getName();  
+
+    synchronized ("Zsh") {
+        if (money >= moneyToDraw) {
+            System.out.println(threadName + moneyToDraw + "成功！");
+            money -= moneyToDraw;
+            System.out.println(threadName + "后，余额变更为：" + money);
+        } else {
+            System.out.println(threadName + "：余额不足！");
+        }
+    }
+}
+```
+
+小明对Account1执行取钱操作时，他加了锁，但不光锁住了小红对Account1的访问权限，也锁住了小黑和小白对Account2的访问权限，这在逻辑上是不合理的！
+
+**根本原因**：“Zsh”这个锁的范围过大。
+
+##### P5 更正P2代码，将锁对象改为`this`
+
+`this`代表账户对象，对于小明、小红来说`this`是account1，对于小黑、小白来说`this`是account2。
+
+```java
+public void drawMoney(double moneyToDraw) {
+    String threadName = Thread.currentThread().getName();
+
+    synchronized (this) {
+        if (money >= moneyToDraw) {
+            System.out.println(threadName + moneyToDraw + "成功！");
+            money -= moneyToDraw;
+            System.out.println(threadName + "后，余额变更为：" + money);
+        } else {
+            System.out.println(threadName + "：余额不足！");
+        }
+    }
+}
+```
+
+##### P6 补充知识
+
+对于静态方法来说，建议使用`类名.class`作为锁对象，因为它只有一份，即：
+
+```java
+synchronized(Xxx.class){
+    
+}
+```
+
+
+
+---
+
+
+
+#### 5.2.2 同步方法
+
+##### P1 概述
+
++ **格式**：
+
+  ```java
+  权限修饰符 synchronized 返回值类型 方法名(形参列表){
+      // 访问共享资源的核心代码
+  }
+  ```
+
++ **作用**：将访问共享资源的核心方法加锁，从而保证线程安全。
+
++ **原理**：
+
+  + 每次只允许一个线程加锁后进入，执行完毕后自动解锁，其它线程才可以再次加锁后进入。
+  + 被`synchronized`修饰的==实例==方法，隐含了一把锁，锁对象默认是`this`。
+  + 被`synchronized`修饰的==静态==方法，隐含了一把锁，锁对象默认是`类名.class`。
+
+##### P2 重构`Account`类
+
+```java
+/**
+ * 账户类，代表小明和小红的共同银行账户
+ * 单例模式
+ */
+public class Account {
+    private double money;// 账户余额
+
+    private static Account account = new Account(100000);
+    private Account(double money) {
+        this.money = money;
+    }
+    public static Account getAccount() {
+        return account;
+    }
+
+    // 同步方法，加上synchronized关键字
+    public synchronized void drawMoney(double moneyToDraw) {
+        String threadName = Thread.currentThread().getName();
+
+        if (money >= moneyToDraw) {
+            System.out.println(threadName + moneyToDraw + "成功！");
+            money -= moneyToDraw;
+            System.out.println(threadName + "后，余额变更为：" + money);
+        } else {
+            System.out.println(threadName + "：余额不足！");
+        }
+
+    }
+
+    public double getMoney() {
+        return money;
+    }
+    public void setMoney(double money) {
+        this.money = money;
+    }
+}
+```
+
+##### P3 控制台输出
+
+![image-20251110152605889](images/image-20251110152605889.png)
+
+##### P4 同步代码块 VS 同步方法
+
+|        | 同步代码块 | 同步方法 |
+| :----: | :--------: | :------: |
+|  范围  |    较小    |   较大   |
+|  性能  |    较高    |   较低   |
+| 可读性 |    较差    |   较好   |
+
+**注**：锁的范围越小，则代码性能越高，因为一个方法内部并非所有代码都是需要互斥访问的临界资源，如果无脑全部锁住，就会导致其他线程无法提前加载那些非临界资源，导致性能下降。
+
+
+
+---
+
+
+
+#### 5.2.3 `Lock`锁
+
+##### P1 概述
+
++ `Lock`锁是`JDK5`开始提供的一个新的锁操作，通过它可以创建出锁对象，进行手动加锁和解锁，更加灵活、方便和强大。
++ `Lock`是一个接口，不能直接实例化，我们可以用它的其中一个实现类`ReentrantLock`来创建锁对象。
+
+##### P2 重构`Account`类
+
+```java
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * 账户类，代表小明和小红的共同银行账户
+ * 单例模式
+ */
+public class Account {
+    private double money;// 账户余额
+    private final Lock accountLock = new ReentrantLock();// Lock锁对象，一个账户对象一把锁
+
+    private static Account account = new Account(100000);
+    private Account(double money) {
+        this.money = money;
+    }
+    public static Account getAccount() {
+        return account;
+    }
+
+    public void drawMoney(double moneyToDraw) {
+        String threadName = Thread.currentThread().getName();
+
+        accountLock.lock();// 加锁
+        if (money >= moneyToDraw) {
+            System.out.println(threadName + moneyToDraw + "成功！");
+            money -= moneyToDraw;
+            System.out.println(threadName + "后，余额变更为：" + money);
+        } else {
+            System.out.println(threadName + "：余额不足！");
+        }
+        accountLock.unlock();// 解锁
+
+    }
+
+    public double getMoney() {
+        return money;
+    }
+    public void setMoney(double money) {
+        this.money = money;
+    }
+}
+```
+
+##### P3 控制台输出
+
+![image-20251110154645208](images/image-20251110154645208.png)
+
+##### P4 上述代码存在的问题
+
+`drawMoney`方法内部，若加锁后，执行访问共享资源的核心代码过程中出现了异常，会使线程异常终止，无法进行解锁操作，从而导致其他线程也无法加锁，程序卡死。
+
+##### P5 更正P2代码，使用`try-catch-finally`包裹核心代码
+
+```java
+public void drawMoney(double moneyToDraw) {
+    String threadName = Thread.currentThread().getName();
+
+    accountLock.lock();// 加锁
+    try {
+        if (money >= moneyToDraw) {
+            System.out.println(threadName + moneyToDraw + "成功！");
+            money -= moneyToDraw;
+            System.out.println(threadName + "后，余额变更为：" + money);
+        } else {
+            System.out.println(threadName + "：余额不足！");
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        accountLock.unlock();// 解锁
+    }  
+}
+```
+
+
+
+---
+
+
+
+## 六、线程通信
+
+### 6.1 概述
+
++ 当多个线程同时访问同一个共享资源时，线程之间可以通过某种方式互相告知自己的状态以相互协调，避免无效的资源争夺。
+
+### 6.2 线程通信的常见模型——生产者与消费者模型
+
++ 生产者线程负责生产数据。
++ 消费者线程负责消费生产者线程生产出来的数据。
++ 生产者生产完数据后应该通知消费者消费，然后等待自己（不继续生产）；消费者消费完数据后也应该通知生产者生产，然后等待自己（不继续消费）。
++ **先唤醒别人，再等待自己**，否则无法唤醒。
+
+### 6.3 用程序模拟生产者与消费者模型
+
+#### P1 需求
+
++ 创建3个生产者线程，负责生产包子，每个线程每次只能生产1个包子放在桌子上；
++ 创建2个消费者线程，负责吃包子，每个线程每次只能从桌子上拿1个包子吃。
+
+#### P2 `Object`类提供的等待和唤醒方法
+
+> [!WARNING]
+>
+> 以下方法应该使用当前同步锁对象进行调用。
+
+| 方法               | 说明                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| `void wait()`      | 让当前线程等待并释放占用的锁，直到另一个线程调用`notify()`或`notifyAll()`方法。 |
+| `void notify()`    | 唤醒正在等待的某个线程。                                     |
+| `void notifyAll()` | 唤醒正在等待的所有线程。                                     |
+
+#### P3 代码演示
+
++ `Desk`:
+
+  ```java
+  import java.util.ArrayList;
+  import java.util.List;
+  
+  public class Desk {
+      private List<String> list = new ArrayList<>();
+  
+      // 放1个包子：cook1 cook2 cook3
+      public synchronized void put() {
+          String name = Thread.currentThread().getName();
+          try {
+              if (list.size() == 0) {
+                  list.add(name + "'s bread");
+                  System.out.println(name + " makes a bread");
+                  Thread.sleep(1000);
+  
+                  // 先唤醒别人，再等待自己，否则无法唤醒
+                  this.notifyAll();
+                  this.wait();
+              } else {
+                  // 有包子了，不做了
+                  // 先唤醒别人，再等待自己，否则无法唤醒
+                  this.notifyAll();
+                  this.wait();
+              }
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+      }
+  
+      // 取1个包子：eater1 eater2
+      public synchronized void get() {
+          String name = Thread.currentThread().getName();
+          try {
+              if (list.size() == 1) {
+                  System.out.println(name + " eats " + list.get(0));
+                  list.clear();
+                  Thread.sleep(1000);
+  
+                  this.notifyAll();
+                  this.wait();
+              } else {
+                  this.notifyAll();
+                  this.wait();
+              }
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+      }
+  }
+  ```
+
++ `Cook`:
+
+  ```java
+  public class Cook implements Runnable {
+      private Desk desk;
+  
+      public Cook(Desk desk) {
+          this.desk = desk;
+      }
+  
+      @Override
+      public void run() {
+          while (true) {
+              desk.put();
+          }
+      }
+  }
+  ```
+
++ `Eater`:
+
+  ```java
+  public class Eater implements Runnable {
+      private Desk desk;
+  
+      public Eater(Desk desk) {
+          this.desk = desk;
+      }
+  
+      @Override
+      public void run() {
+          while (true) {
+              desk.get();
+          }
+      }
+  }
+  ```
+
++ `Test`:
+
+  ```java
+  public class Test {
+      public static void main(String[] args) {
+          Desk desk = new Desk();
+  
+          // 创建3个生产者线程
+          new Thread(new Cook(desk), "cook1").start();
+          new Thread(new Cook(desk), "cook2").start();
+          new Thread(new Cook(desk), "cook3").start();
+  
+          // 创建2个消费者线程
+          new Thread(new Eater(desk), "eater1").start();
+          new Thread(new Eater(desk), "eater2").start();
+      }
+  }
+  ```
+
+#### P4 控制台输出（每次输出结果都不同，仅截取其中某一次）
+
+![image-20251110164842595](images/image-20251110164842595.png)
+
+
+
+---
+
+
+
+## 七、线程池
+
+### 7.1 概述
+
++ 线程池是一个可以复用线程的技术。
+
++ **不使用线程池时存在的问题**：用户每发起一个请求，后台就需要创建一个新线程来处理这个请求，而创建新线程的开销是很大的，并且请求过多时会产生大量线程，严重影响系统性能。
+
++ **线程池的工作原理**：
+
+  ![image-20251110225346287](images/image-20251110225346287.png)
+
+
+
+### 7.2 创建线程池
+
+> [!Important]
+>
+> `JDK5.0`起提供了代表线程池的接口：`ExecutorService`。
+
+#### 7.2.0 注意事项
+
++ 临时线程什么时候创建？
+  + 新任务提交时发现核心线程都在忙，任务队列也满了，并且线程池允许创建临时线程，此时才可以创建临时线程。
++ 什么时候开始拒绝新任务？
+  + 核心线程和临时线程都在忙，任务队列也满了，新任务过来的时候才会开始拒绝新任务。
++ 线程池的线程数设置为多少比较好？
+  + **计算密集型任务**：推荐核心线程数=本机线程数（x核y线程，看y）+1
+  + **IO密集型任务**：推荐核心线程数=本机线程数（x核y线程，看y）*2
+
+
+
+
+---
+
+
+
+#### 7.2.1 创建线程池方式一：使用`ExecutorService`的实现类`ThreadPoolExecutor`
+
+##### P1 主要有参构造器
+
+```java
+public ThreadPoolExecutor(
+	int corePoolSize,                   // 线程池的核心线程数
+    int maximumPoolSize,                // 线程池的最大线程数（核心线程数+临时线程数）
+    long keepAliveTime,                 // 临时线程的存活时间
+    TimeUnit unit,                      // 临时线程的存活时间单位（纳秒/毫秒/秒/分钟/...） 
+    BlockingQueue<Runnable> workQueue,  // 线程池的任务队列
+    ThreadFactory threadFactory,        // 线程池的线程工厂
+    RejectedExecutionHandler handler    // 线程池的任务拒绝策略（线程都在忙，任务队列也满了的时										 				    	候，新任务来了怎么处理）
+)
+```
+
+**代码演示**：
+
+```java
+public class Test {
+    public static final int CORE_POOL_SIZE = 3;
+    public static final int MAX_POOL_SIZE = 5;
+    public static final long KEEP_ALIVE_TIME = 10;
+
+    public static void main(String[] args) {
+        ExecutorService executorService = new ThreadPoolExecutor(
+                CORE_POOL_SIZE,
+                MAX_POOL_SIZE,
+                KEEP_ALIVE_TIME,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(4),
+                Executors.defaultThreadFactory(),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
+    }
+}
+```
+
+
+
+##### P2 `ExecutorService`的常用方法
+
+| 序号 | 方法                                 | 说明                                                         |
+| ---- | ------------------------------------ | ------------------------------------------------------------ |
+| 01   | `void execute(Runnable command)`     | 执行`Runnable`任务。                                         |
+| 02   | `Future<T> submit(Callable<T> task)` | 执行`Callable`任务，返回未来任务对象，用于获取线程返回的结果。 |
+| 03   | `void shutdown()`                    | 等全部任务执行完毕后，再关闭线程池。                         |
+| 04   | `List<Runnable> shutdownNow()`       | 立即关闭线程池，停止正在执行的任务，并返回队列中未执行的任务。 |
+
+
+
+---
+
+
+
+#### 7.2.2 使用线程池处理`Runnable`任务
+
+##### P1 复用核心线程
+
+> [!CAUTION]
+>
+> 当每个线程执行的任务内容不多，可以很快执行完毕的情况下，线程池会复用核心线程。
+
+```java
+import java.util.concurrent.*;
+
+public class Test {
+    public static final int CORE_POOL_SIZE = 3;
+    public static final int MAX_POOL_SIZE = 5;
+    public static final long KEEP_ALIVE_TIME = 10;
+
+    public static void main(String[] args) {
+        ExecutorService pool = new ThreadPoolExecutor(
+                CORE_POOL_SIZE,
+                MAX_POOL_SIZE,
+                KEEP_ALIVE_TIME,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(4),
+                Executors.defaultThreadFactory(),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
+
+        Runnable target = (() -> {
+            String name = Thread.currentThread().getName();
+            System.out.println(name + "==> output 666");
+            try {
+                Thread.sleep(1000);// 休眠1s
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        });
+
+        pool.execute(target);// 线程池会自动创建一个新线程，自动处理这个任务，自动执行
+        pool.execute(target);// 线程池会自动创建一个新线程，自动处理这个任务，自动执行
+        pool.execute(target);// 线程池会自动创建一个新线程，自动处理这个任务，自动执行
+        pool.execute(target);// 复用前面的核心线程
+        pool.execute(target);// 复用前面的核心线程
+        pool.shutdown();
+    }
+}
+```
+
+**控制台输出**：
+
+<img src="images/image-20251112235205395.png" alt="image-20251112235205395" style="zoom:67%;" />
+
+
+
+##### P2 启用临时线程
+
+> [!CAUTION]
+>
+> 新任务提交时发现核心线程都在忙，任务队列也满了，并且线程池允许创建临时线程，此时会启用临时线程。
+
+```java
+import java.util.concurrent.*;
+
+public class Test {
+    public static final int CORE_POOL_SIZE = 3;
+    public static final int MAX_POOL_SIZE = 5;
+    public static final long KEEP_ALIVE_TIME = 10;
+
+    public static void main(String[] args) {
+        ExecutorService pool = new ThreadPoolExecutor(
+                CORE_POOL_SIZE,
+                MAX_POOL_SIZE,
+                KEEP_ALIVE_TIME,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(4),
+                Executors.defaultThreadFactory(),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
+
+        Runnable target = (() -> {
+            String name = Thread.currentThread().getName();
+            System.out.println(name + "==> output 666");
+            try {
+                Thread.sleep(Integer.MAX_VALUE);// 无止境休眠
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        });
+
+        pool.execute(target);// 线程池会自动创建一个新线程，自动处理这个任务，自动执行
+        pool.execute(target);// 线程池会自动创建一个新线程，自动处理这个任务，自动执行
+        pool.execute(target);// 线程池会自动创建一个新线程，自动处理这个任务，自动执行
+        pool.execute(target);// 进入任务队列：1/4
+        pool.execute(target);// 进入任务队列：2/4
+        pool.execute(target);// 进入任务队列：3/4
+        pool.execute(target);// 进入任务队列：4/4，任务队列已满
+        pool.execute(target);// 开始启用临时线程
+        pool.execute(target);// 启用第2个临时线程
+        pool.shutdown();
+    }
+}
+```
+
+**控制台输出**：
+
+<img src="images/image-20251112235727030.png" alt="image-20251112235727030" style="zoom:67%;" />
+
+
+
+##### P3 拒绝新任务
+
+> [!CAUTION]
+>
+> 核心线程和临时线程都在忙，任务队列也满了，新任务过来的时候才会开始拒绝新任务。
+
+继续追加一行代码`pool.execute(target);`，控制台输出如下：
+
+```shell
+Exception in thread "main" java.util.concurrent.RejectedExecutionException: Task thread_pool.Test$$Lambda/0x000001c6dc0031f8@9807454 rejected from java.util.concurrent.ThreadPoolExecutor@12edcd21[Running, pool size = 5, active threads = 5, queued tasks = 4, completed tasks = 0]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(ThreadPoolExecutor.java:2081)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:841)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:1376)
+	at thread_pool.Test.main(Test.java:40)
+pool-1-thread-2==> output 666
+pool-1-thread-4==> output 666
+pool-1-thread-3==> output 666
+pool-1-thread-5==> output 666
+pool-1-thread-1==> output 666
+```
+
+
+
+##### P4 新任务拒绝策略
+
+| 策略                                     | 说明                                                         |
+| :--------------------------------------- | ------------------------------------------------------------ |
+| `ThreadPoolExecutor.AbortPolicy`         | 丢弃新任务并抛出`RejectedExecutionException`异常，是**默认策略**。 |
+| `ThreadPoolExecutor.DiscardPolicy`       | 丢弃新任务，但是不抛出任何异常，**不推荐**此策略。           |
+| `ThreadPoolExecutor.DiscardOldestPolicy` | 丢弃任务队列中等待最久的任务（即队尾任务），然后把新任务加入队列中。 |
+| `ThreadPoolExecutor.CallerRunPolicy`     | 由主线程负责调用新任务的`run()`方法，从而绕过线程池直接执行。 |
+
+
+
+---
+
+
+
+#### 7.2.3 使用线程池处理`Callable`任务
+
+```java
+import java.util.concurrent.*;
+
+public class Test2 {
+    public static final int CORE_POOL_SIZE = 3;
+    public static final int MAX_POOL_SIZE = 5;
+    public static final long KEEP_ALIVE_TIME = 10;
+
+    public static void main(String[] args) throws Exception {
+        ExecutorService pool = new ThreadPoolExecutor(
+                CORE_POOL_SIZE,
+                MAX_POOL_SIZE,
+                KEEP_ALIVE_TIME,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(4),
+                Executors.defaultThreadFactory(),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
+
+        Callable<String> myCallable = (() -> {
+            String name = Thread.currentThread().getName();
+            int sum = 0;
+            for (int i = 1; i <= 100; i++) {
+                sum += i;
+            }
+            return name + " calculate the sum from 1 to 100: " + sum;
+        });
+
+        Future<String> f1 = pool.submit(myCallable);
+        Future<String> f2 = pool.submit(myCallable);
+        Future<String> f3 = pool.submit(myCallable);
+        Future<String> f4 = pool.submit(myCallable);
+        System.out.println(f1.get());
+        System.out.println(f2.get());
+        System.out.println(f3.get());
+        System.out.println(f4.get());
+        pool.shutdown();
+
+    }
+}
+```
+
+**控制台输出**：
+
+<img src="images/image-20251113002344544.png" alt="image-20251113002344544" style="zoom:67%;" />
+
+
+
+---
+
+
+
+#### 7.2.4 创建线程池方式二：使用`Executors`的工厂方法
+
+`Executors`是线程池的一个工具类，提供了很多静态方法，用于返回不同特点的线程池对象。
+
+| 序号 | 静态方法                                                     | 说明                                                         |
+| ---- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 01   | `static ExecutorService newFixedThreadPool(int nThreads)`    | 创建固定数量线程的线程池，如果某个线程因为执行异常而结束，那么线程池会复用一个线程代替它。 |
+| 02   | `static ExecutorService newSingleThreadExecutor()`           | 创建只有一个线程的线程池，如果该线程因为执行异常而结束，那么线程池会复用一个线程代替它。 |
+| 03   | `static ExecutorService newCachedThreadPool()`               | 创建一个线程池，它会根据需要自动增加线程数量，但在已有线程可用时会优先复用这些先前创建的线程。如果线程任务执行完毕且空闲了60s，则该线程会被回收。 |
+| 04   | `static ScheduledExecutorService newScheduledThreadPool(int corePoolSize)` | 创建一个能够在指定延迟后运行任务，或定期执行任务的线程池。   |
+
+这些静态方法的底层实现，本质上都是通过使用`ExecutorService`的实现类`ThreadPoolExecutor`来创建线程池对象。
+
+**注意事项**：大型并发系统中，使用`Executors`可能会导致OOM（OutOfMemory：内存溢出错误），阿里巴巴Java开发手册明确指出：
+
+<img src="images/image-20251113005347743.png" alt="image-20251113005347743" style="zoom: 80%;" />
+
+
+
+---
+
+
+
+## 八、其它细节
+
+### 8.1 进程
+
++ 正在运行的程序或软件就是一个独立的进程。
++ 线程属于进程，一个进程中可以同时运行多个线程。
++ 进程中的多个线程是既有并发，又有并行地执行的。
+
+
+
+### 8.2 并发与并行
+
++ **并发**：进程中的线程是由CPU负责调度执行的，但CPU能够同时处理的线程数量有限，为了保证全部线程都能往前执行，CPU会轮询为每个线程服务，由于CPU的线程切换速度极快，对于程序员来说就好像这些线程在同时执行。这就是“并发”。
++ **并行**：在同一个时间点，同时有多个线程在被CPU调度执行。比如我的笔记本电脑是8核16线程，那么最多支持16个线程并行运行。
+
+
+
+### 8.3 线程的生命周期
+
++ **生命周期**：线程从生到死的过程中，经历的各种状态及状态转换。
+
+#### 8.3.1 Java线程的6种状态
+
+<img src="images/image-20251113212949775.png" alt="image-20251113212949775" style="zoom: 67%;" />
+
+#### 8.3.2 线程状态的互相转换
+
+<img src="images/image-20251113213420179.png" alt="image-20251113213420179" style="zoom: 67%;" />
+
+
+
+### 8.4 悲观锁和乐观锁
+
+#### 8.4.1 概述
+
++ **悲观锁**：访问临界资源前必须加锁，每次只能一个线程访问完毕后再解锁。线程安全，但如果有大量线程同时想要访问临界资源，会导致激烈的锁竞争，性能较差。
+
++ **乐观锁**：访问临界资源前不加锁，认为没有问题，等到出现线程安全问题时才介入处理。线程安全，性能较好。
+
+
+
+#### 8.4.2 案例代码
+
++ `Test`：
+
+  ```java
+  public class Test {
+      public static void main(String[] args) {
+          // 需求：1个变量，1000个线程，每个线程对该变量执行1000次+1操作
+          Runnable target = new MyRunnable();
+          for (int i = 0; i < 1000; i++) {
+              new Thread(target).start();
+          }
+      }
+  }
+  ```
+
++ `MyRunnable`：
+
+  ```java
+  public class MyRunnable implements Runnable {
+      private int count=0;
+  
+      @Override
+      public void run() {
+          for (int i = 0; i < 1000; i++) {
+              System.out.println("count ==> " + (++count));
+          }
+      }
+  }
+  ```
+
++ 某次控制台输出如下：
+
+  <img src="images/image-20251113221528261.png" alt="image-20251113221528261" style="zoom:67%;" />
+
+  
+
+  按照预期，`count`的最终值应该是1000000，但显然在此次输出中`count`的最终值是999956，表明案例代码存在线程安全问题。这是因为，有可能出现两个线程同时取出`count`值，比如都是10，然后都对`count`进行+1操作，变成11，这样就相当于抵消了1次+1操作。
+
+
+
+---
+
+
+
+#### 8.4.3 使用悲观锁解决线程安全问题
+
+```java
+public class MyRunnable implements Runnable {
+    private int count = 0;
+    private long start;
+    private long end;
+
+    @Override
+    public void run() {
+        synchronized (this) {
+            if (count == 0) {
+                start = System.currentTimeMillis();
+            }
+        }
+
+        for (int i = 0; i < 1000; i++) {
+            synchronized (this) {
+                System.out.println("count ==> " + (++count));
+            }
+        }
+
+        synchronized (this) {
+            if (count == 1000000) {
+                end = System.currentTimeMillis();
+                System.out.println("using time millis: " + (end - start));
+            }
+        }
+    }
+}
+```
+
+**控制台输出**：
+
+<img src="images/image-20251113221410583.png" alt="image-20251113221410583" style="zoom:67%;" />
+
+可以看到，线程安全问题已经被解决了，耗时3070ms。
+
+
+
+#### 8.4.4 使用乐观锁解决线程安全问题
+
+```java
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class MyRunnable implements Runnable {
+    private long start;
+    private long end;
+
+    // 适用于整数修改的乐观锁：Atomic的一个实现类
+    private AtomicInteger count = new AtomicInteger();
+
+    @Override
+    public void run() {
+        synchronized (this) {
+            if (count.get() == 0) {
+                start = System.currentTimeMillis();
+            }
+        }
+
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("count ==> " + count.incrementAndGet());
+        }
+
+        synchronized (this) {
+            if (count.get() == 1000000) {
+                end = System.currentTimeMillis();
+                System.out.println("using time millis: " + (end - start));
+            }
+        }
+    }
+}
+```
+
+**控制台输出**：
+
+<img src="images/image-20251113222713831.png" alt="image-20251113222713831" style="zoom:67%;" />
+
+可以看到，线程安全问题已经被解决了，耗时2931ms，比使用悲观锁快了大约140ms。
+
+
+
+---
+
+
+
+#### 8.4.5 深入分析`AtomicInteger`源码
+
+##### P0 CAS(Compare-And-Swap)算法
+
+以下原理图来自文章：https://medium.com/@pravvich/cas-and-faa-through-the-eyes-of-a-java-developer-8a028f213624，
+
+仅用于个人学习，如有侵权，请联系删除。
+
+<img src="images/image-20251113224818183.png" alt="image-20251113224818183" style="zoom: 40%;" />
+
+<img src="images/1T-_PHXV4QWBEWKlRMkdCuw.png" alt="img" style="zoom: 60%;" />
+
+---
+
+##### P1 `incrementAndGet()`方法
+
+<img src="images/image-20251113223008191.png" alt="image-20251113223008191" style="zoom: 80%;" />
+
+---
+
+##### P2 `VALUE`变量
+
+<img src="images/image-20251113223407162.png" alt="image-20251113223407162" style="zoom:80%;" />
+
+分析可知，`VALUE`是一个指向`value`的指针。
+
+---
+
+##### P3 `getAndAddInt()`方法
+
+<img src="images/image-20251113223556604.png" alt="image-20251113223556604" style="zoom: 80%;" />
+
+分析可知，该方法本质上基于**CAS**算法。
+
+---
+
+##### P4 `weakCompareAndSetInt()`方法（`weak`意为弱化版）
+
+<img src="images/image-20251113230015981.png" alt="image-20251113230015981" style="zoom: 80%;" />
+
+此方法的返回值是调用了另一个方法`compareAndSetInt()`：
+
+<img src="images/image-20251113230114358.png" alt="image-20251113230114358" style="zoom:80%;" />
+
+此方法用`native`关键字修饰，表示是由C/C++实现，而非Java，意味着我们的分析已经触及到最底层了。
+
+
+
