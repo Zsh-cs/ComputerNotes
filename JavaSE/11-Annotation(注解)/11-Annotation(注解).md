@@ -174,9 +174,187 @@ public @interface 注解名 {
 
 
 
+### 2.代码演示
+
+#### 2.1 需求
+
+1. 定义注解`MyAnnotation3`，要求：
+
+   + 包含属性：`String value()`, `double a() default 100`, `String[] b`。
+
+   + 限制注解只能使用在类和成员方法上。
+
+   + 注解一直保留到运行阶段。
+
+2. 定义一个类`Demo`，在类中定义一个`test`方法，并在该类和其方法上使用`MyAnnotation3`注解。
+
+3. 定义测试类`AnnotationParser`，用于解析`Demo`类中的全部注解。
 
 
 
+#### 2.2 代码实现
+
++ `MyAnnotation`:
+
+  ```java
+  import java.lang.annotation.ElementType;
+  import java.lang.annotation.Retention;
+  import java.lang.annotation.RetentionPolicy;
+  import java.lang.annotation.Target;
+  
+  @Target({ElementType.TYPE, ElementType.METHOD})
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface MyAnnotation3 {
+      String value();
+      double a() default 100;
+      String[] b();
+  }
+  ```
+
++ `Demo`:
+
+  ```java
+  @MyAnnotation3(value = "chatgpt", a = 666.66, b = {"beef", "mutton"})
+  public class Demo {
+  
+      @MyAnnotation3(value = "gemini", a = 9.99, b = {"dog", "cat"})
+      public static void test() {
+  
+      }
+  }
+  ```
+
++ `AnnotationParser`:
+
+  ```java
+  import java.lang.annotation.Annotation;
+  import java.lang.reflect.Method;
+  import java.util.Arrays;
+  
+  public class AnnotationParser {
+      public static void main(String[] args) throws NoSuchMethodException {
+          parseClass();
+          System.out.println();
+          parseMethod();
+      }
+  
+      public static void parseClass() {
+          Class demo = Demo.class;
+          if (demo.isAnnotationPresent(MyAnnotation3.class)) {
+              MyAnnotation3 annotation = (MyAnnotation3) demo.getDeclaredAnnotation(MyAnnotation3.class);
+              System.out.println("value=" + annotation.value());
+              System.out.println("a=" + annotation.a());
+              System.out.println("b=" + Arrays.toString(annotation.b()));
+          }
+      }
+  
+      public static void parseMethod() throws NoSuchMethodException {
+          Method test1 = Demo.class.getDeclaredMethod("test");
+          if (test1.isAnnotationPresent(MyAnnotation3.class)) {
+              MyAnnotation3 annotation = (MyAnnotation3) test1.getDeclaredAnnotation(MyAnnotation3.class);
+              System.out.println("value=" + annotation.value());
+              System.out.println("a=" + annotation.a());
+              System.out.println("b=" + Arrays.toString(annotation.b()));
+          }
+  
+      }
+  }
+  ```
+
++ 控制台输出：
+
+  <img src="images/image-20251120211407202.png" alt="image-20251120211407202" style="zoom:67%;" />
+
+
+
+---
+
+
+
+## 五、注解的应用场景——案例：模拟`JUnit`框架
+
+### 1.需求分析
+
+**需求**：定义几个方法，只要加了`@MyTest`注解，就会触发该方法执行。
+
+**分析**：
+
+1. 自定义注解`@MyTest`，只能注解方法，一直存活。
+2. 定义几个方法，一部分加上`@MyTest`注解修饰，另一部分不加。
+3. 模拟一个`junit`程序，所有加了`@MyTest`注解的方法都会被触发执行（使用暴力反射）。
+
+
+
+### 2.代码实现
+
++ `MyTest`:
+
+  ```java
+  package my_junit;
+  
+  import java.lang.annotation.ElementType;
+  import java.lang.annotation.Retention;
+  import java.lang.annotation.RetentionPolicy;
+  import java.lang.annotation.Target;
+  
+  @Target(ElementType.METHOD)
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface MyTest {
+  }
+  ```
+
++ `MyJunit`:
+
+  ```java
+  package my_junit;
+  
+  import java.lang.reflect.InvocationTargetException;
+  import java.util.Arrays;
+  
+  public class MyJunit {
+  
+      public static void main(String[] args) {
+  
+          MyJunit myJunit = new MyJunit();
+          Class c = MyJunit.class;
+  
+          Arrays.stream(c.getDeclaredMethods()).forEach(method -> {
+              if (method.isAnnotationPresent(MyTest.class)) {
+                  try {
+                		method.setAccessible(true);
+                      method.invoke(myJunit);
+                  } catch (IllegalAccessException e) {
+                      throw new RuntimeException(e);
+                  } catch (InvocationTargetException e) {
+                      throw new RuntimeException(e);
+                  }
+              }
+          });
+      }
+  
+      public void test1() {
+          System.out.println("===test1===");
+      }
+  
+      @MyTest
+      public void test2() {
+          System.out.println("===test2===");
+      }
+  
+      public void test3() {
+          System.out.println("===test3===");
+      }
+  
+      @MyTest
+      public void test4() {
+          System.out.println("===test4===");
+      }
+  }
+  ```
+
++ 控制台输出：
+
+  <img src="images/image-20251120220136419.png" alt="image-20251120220136419" style="zoom:67%;" />
 
 
 
