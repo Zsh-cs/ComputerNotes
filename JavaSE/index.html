@@ -161,10 +161,8 @@ title: JavaSE Notes
 
   <hr style="margin-top: 40px;">
 
-  <p style="text-align:center; font-size:14px; color:#555;">
-    Last updated:
-    {{ site.time | date: "%Y-%m-%d %H:%M" }}
-  </p>
+  {% assign local = site.time | date: "%s" | plus: 28800 %}
+  Last updated: {{ Beijing | date: "%Y-%m-%d %H:%M" }}
 
 
 </body>
