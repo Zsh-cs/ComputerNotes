@@ -172,6 +172,16 @@ IP地址是数字形式，可读性差且难以记忆，因此人们发明了可
 
 ## 三、网络编程
 
+> [!Warning]
+>
+> `try-with-resources`是一把双刃剑：
+>
+> + 优点是代码更简洁和健壮，同时防止资源泄露；
+>
+> + 缺点是可能导致底层资源被意外关闭，不适用于需要长期保持连接的资源，如网络通信中的 `Socket` 流！
+>
+> 由于我编码时没有意识到这个缺点，故而以下代码均采用了这种方式自动关闭资源，请各位不要效仿！
+
 ### 1.`InetAddress`类：代表IP地址
 
 | 序号 | 方法                                        | 说明                                                         |
@@ -227,11 +237,15 @@ IP地址是数字形式，可读性差且难以记忆，因此人们发明了可
 
 
 
+---
+
+
+
 #### 2.3 一发一收
 
 > [!Caution]
 >
-> 用完`Socket`后记得关闭资源，建议使用`try-with-resource`的代码方式进行自动关闭。
+> 用完`Socket`后记得关闭资源。
 
 + `Server`:
 
@@ -311,9 +325,114 @@ IP地址是数字形式，可读性差且难以记忆，因此人们发明了可
 
 
 
+---
+
+
+
 #### 2.4 多发多收
 
+##### P1 IDEA中允许客户端多开的设置步骤
 
+<img src="images/image-20251123172456167.png" alt="image-20251123172456167" style="zoom:67%;" />
+
+<img src="images/image-20251123172642082.png" alt="image-20251123172642082" style="zoom:67%;" />
+
+<img src="images/image-20251123172735932.png" alt="image-20251123172735932" style="zoom:67%;" />
+
+最后点击Apply或OK即可。
+
+
+
+##### P2 代码实现
+
++ `Server`:
+
+  ```java
+  package udp;
+  
+  import java.io.IOException;
+  import java.net.DatagramPacket;
+  import java.net.DatagramSocket;
+  import java.net.InetAddress;
+  import java.net.UnknownHostException;
+  
+  public class Server {
+      public static final InetAddress IP;
+      public static final int PORT = 6666;
+      public static final int LENGTH = 1024 * 64;// 64KB
+  
+      static {
+          try {
+              IP = InetAddress.getLocalHost();
+          } catch (UnknownHostException e) {
+              throw new RuntimeException(e);
+          }
+      }
+  
+      public static void main(String[] args) {
+          System.out.println("Server starts");
+          try (
+                  DatagramSocket socket = new DatagramSocket(PORT);
+          ) {
+              byte[] buf = new byte[LENGTH];
+              DatagramPacket packet = new DatagramPacket(buf, LENGTH);
+  
+              int count = 1;
+              while (true) {
+                  socket.receive(packet);
+                  System.out.println("=====Packet " + (count++) + "=====");
+                  System.out.println("Client IP: " + packet.getAddress().getHostAddress());
+                  System.out.println("Client Port: " + packet.getPort());
+                  int length = packet.getLength();
+                  System.out.println("Contents: " + new String(buf, 0, length));// 接收多少，就倒出多少
+                  System.out.println("---------------------------------------------");
+              }
+          } catch (IOException e) {
+              throw new RuntimeException(e);
+          }
+      }
+  }
+  ```
+
++ `Client`:
+
+  ```java
+  package udp;
+  
+  import java.io.IOException;
+  import java.net.*;
+  import java.util.Scanner;
+  
+  public class Client {
+      public static void main(String[] args) {
+  
+          try (
+                  DatagramSocket socket = new DatagramSocket();
+          ) {
+              Scanner sc = new Scanner(System.in);
+              while (true) {
+                  System.out.println("please input a message:");
+                  String msg = sc.nextLine();
+                  if (msg.equals("exit")) {
+                      System.out.println("Client exits successfully");
+                      break;
+                  }
+  
+                  byte[] buf = msg.getBytes();
+                  DatagramPacket packet = new DatagramPacket(
+                          buf, buf.length, Server.IP, Server.PORT);
+                  socket.send(packet);
+              }
+          } catch (IOException e) {
+              throw new RuntimeException();
+          }
+      }
+  }
+  ```
+
++ 先启动服务端，再分别启动3个客户端，控制台输出如下：
+
+  <img src="images/image-20251123173622531.png" alt="image-20251123173622531" style="zoom:67%;" />
 
 
 
@@ -321,15 +440,328 @@ IP地址是数字形式，可读性差且难以记忆，因此人们发明了可
 
 
 
-### 3.TCP通信
+### 3A.单客户端TCP通信
+
+#### 3A.1 原理图
+
+<img src="images/image-20251123174512508.png" alt="image-20251123174512508" style="zoom:80%;" />
+
+#### 3A.2 `Socket`类：开发客户端
+
+##### P1 构造器
+
+| 构造器                                 | 说明                                                         |
+| -------------------------------------- | ------------------------------------------------------------ |
+| `public Socket(String host, int port)` | 根据服务端IP和端口号，请求与服务端建立连接，连接成功后返回客户端`Socket`对象。 |
+
+##### P2 常用方法
+
+| 方法                             | 说明                 |
+| -------------------------------- | -------------------- |
+| `OutputStream getOutputStream()` | 获取字节输出流对象。 |
+| `InputStream getInputStream()`   | 获取字节输入流对象。 |
 
 
 
+#### 3A.3 `ServerSocket`类：开发服务端
+
+##### P1 构造器
+
+| 构造器                          | 说明                   |
+| ------------------------------- | ---------------------- |
+| `public ServerSocket(int port)` | 为服务端程序注册端口。 |
+
+##### P2 常用方法
+
+| 方法              | 说明                                                         |
+| ----------------- | ------------------------------------------------------------ |
+| `Socket accept()` | 阻塞等待客户端的连接请求，一旦与某个客户端连接成功，就返回服务端`Socket`对象。 |
 
 
 
+#### 3A.4 代码演示（一发一收）
+
++ `Server`:
+
+  ```java
+  package tcp;
+  
+  import java.io.DataInputStream;
+  import java.io.IOException;
+  import java.net.InetAddress;
+  import java.net.ServerSocket;
+  import java.net.Socket;
+  import java.net.UnknownHostException;
+  
+  public class Server {
+      public static final String IP;
+      public static final int PORT = 6666;
+  
+      static {
+          try {
+              IP = InetAddress.getLocalHost().getHostAddress();
+          } catch (UnknownHostException e) {
+              throw new RuntimeException(e);
+          }
+      }
+  
+      public static void main(String[] args) {
+          try (
+                  ServerSocket serverSocket = new ServerSocket(PORT);
+                  Socket socket = serverSocket.accept();
+                  DataInputStream dis = new DataInputStream(socket.getInputStream());
+          ) {
+              System.out.println("Client Address: " + socket.getRemoteSocketAddress());
+              System.out.println("Contents: " + dis.readUTF());
+  
+          } catch (IOException e) {
+              throw new RuntimeException(e);
+          }
+      }
+  }
+  ```
+
++ `Client`:
+
+  ```java
+  package tcp;
+  
+  import java.io.DataOutputStream;
+  import java.io.IOException;
+  import java.net.Socket;
+  import java.net.UnknownHostException;
+  
+  public class Client {
+      public static void main(String[] args) {
+          try (
+                  Socket socket = new Socket(Server.IP, Server.PORT);
+                  DataOutputStream dos = new DataOutputStream(socket.getOutputStream());// 把低级流包装成高级流
+          ) {
+  
+              dos.writeUTF("Can we be together?");
+  
+          } catch (UnknownHostException e) {
+              throw new RuntimeException(e);
+          } catch (IOException e) {
+              throw new RuntimeException(e);
+          }
+      }
+  }
+  ```
+
++ 先启动服务端，再启动客户端，控制台输出如下：
+
+  <img src="images/image-20251123224347351.png" alt="image-20251123224347351" style="zoom:67%;" />
 
 
+
+#### 3A.5 单客户端多发多收注意事项
+
+1.客户端每写一次数据，就要刷新一下。
+
+<img src="images/image-20251123224651152.png" alt="image-20251123224651152" style="zoom:67%;" />
+
+2.若客户端突然离线，则服务端必须处理异常，关闭相关资源。
+
+<img src="images/image-20251123225133322.png" alt="image-20251123225133322" style="zoom:67%;" />
+
+
+
+---
+
+
+
+### 3B.多客户端TCP通信
+
+#### 3B.1 3A代码的局限性
+
+3A代码无法支持多客户端与服务端的TCP通信，根本原因是服务端目前只有一个主线程，只能处理一个客户端的信息。
+
+
+
+#### 3B.2 重构思路：引入多线程
+
+<img src="images/image-20251123230726666.png" alt="image-20251123230726666" style="zoom:60%;" />
+
+
+
+#### 3B.3 代码实现
+
++ `ServerReaderThread`:
+
+  ```java
+  package tcp;
+  
+  import java.io.DataInputStream;
+  import java.io.IOException;
+  import java.net.Socket;
+  
+  public class ServerReaderThread extends Thread {
+      private Socket socket;
+  
+      public ServerReaderThread(Socket socket) {
+          this.socket = socket;
+      }
+  
+      @Override
+      public void run() {
+          try (
+                  DataInputStream dis = new DataInputStream(socket.getInputStream());
+          ) {
+              while (true) {
+                  try {
+                      System.out.println(
+                              "Client Address: " + socket.getRemoteSocketAddress() +
+                                      "\nContents: " + dis.readUTF() + "\n");
+                  } catch (IOException e) {
+                      System.out.println(socket.getRemoteSocketAddress() + " terminals");
+                      dis.close();
+                      socket.close();
+                      break;
+                  }
+              }
+          } catch (IOException e) {
+              throw new RuntimeException(e);
+          }
+      }
+  }
+  ```
+
++ `Server`:
+
+  ```java
+  package tcp;
+  
+  import java.io.IOException;
+  import java.net.InetAddress;
+  import java.net.ServerSocket;
+  import java.net.Socket;
+  import java.net.UnknownHostException;
+  
+  public class Server {
+      public static final String IP;
+      public static final int PORT = 6666;
+  
+      static {
+          try {
+              IP = InetAddress.getLocalHost().getHostAddress();
+          } catch (UnknownHostException e) {
+              throw new RuntimeException(e);
+          }
+      }
+  
+      public static void main(String[] args) throws IOException {
+          System.out.println("Server starts.");
+          ServerSocket serverSocket = new ServerSocket(PORT);
+  
+          while (true) {
+              Socket socket = serverSocket.accept();
+              new ServerReaderThread(socket).start();
+          }
+      }
+  }
+  ```
+
++ `Client`:
+
+  ```java
+  package tcp;
+  
+  import java.io.DataOutputStream;
+  import java.io.IOException;
+  import java.net.Socket;
+  import java.net.UnknownHostException;
+  import java.util.Scanner;
+  
+  public class Client {
+      public static void main(String[] args) {
+          Scanner sc = new Scanner(System.in);
+          try (
+                  Socket socket = new Socket(Server.IP, Server.PORT);
+                  DataOutputStream dos = new DataOutputStream(socket.getOutputStream());// 把低级流包装成高级流
+          ) {
+              while (true) {
+                  System.out.println("Please input a message:");
+                  String msg = sc.nextLine();
+                  if (msg.equals("exit")) {
+                      System.out.println("Client exits successfully!");
+                      break;
+                  }
+                  dos.writeUTF(msg);
+                  dos.flush();
+              }
+          } catch (IOException e) {
+              throw new RuntimeException(e);
+          }
+      }
+  }
+  ```
+
++ 先启动服务端，再分别启动3个客户端，控制台输出如下：
+
+  <img src="images/image-20251123234138709.png" alt="image-20251123234138709" style="zoom:67%;" />
+
+
+
+---
+
+
+
+### 4.TCP通信综合案例
+
+#### 4.1 即时通信群聊
+
+##### P1 原理图
+
+<img src="images/image-20251123234707837.png" alt="image-20251123234707837" style="zoom:67%;" />
+
+##### P2 代码实现
+
+具体代码参见项目：[wechat](TCP/src/wechat)
+
+
+
+---
+
+
+
+#### 4.2 简易版BS架构
+
+##### P1 需求
+
+从浏览器中访问服务器，并立即让服务器响应一个简单网页渲染到浏览器上，网页内容是“黑马程序员666”。
+
+##### P2 原理图
+
+<img src="images/image-20251124010437986.png" alt="image-20251124010437986" style="zoom:67%;" />
+
+<img src="images/image-20251124010551470.png" alt="image-20251124010551470" style="zoom:67%;" />
+
+##### P3 代码实现
+
+具体代码参见项目：[simpleBS](TCP/src/simpleBS)
+
+Chrome浏览器访问localhost:8888，网页展示如下：
+
+<img src="images/image-20251124011049784.png" alt="image-20251124011049784" style="zoom:67%;" />
+
+
+
+---
+
+
+
+### 5.拓展
+
+Q：每次网络请求都开一个新线程，到底好不好？
+
+A：高并发时，容易宕机！
+
+**解决方案**：使用线程池进行优化。
+
+<img src="images/image-20251124011512704.png" alt="image-20251124011512704" style="zoom:67%;" />
+
+<img src="images/image-20251124011720296.png" alt="image-20251124011720296" style="zoom:70%;" />
 
 
 
