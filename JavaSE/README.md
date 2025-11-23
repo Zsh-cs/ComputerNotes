@@ -1,5 +1,9 @@
 # JavaSE
 
+*Language*: English/[Chinese](README_Chinese.md)
+
+
+
 The main content in this folder records the JavaSE knowledge I taught myself through the "Master Java in 20 Days" tutorial video by 黑马程序员 (link: https://www.bilibili.com/video/BV1Cv411372m/?spm_id_from=333.337.search-card.all.click).
 
 In fact, I had already watched this set of tutorial videos back in 2024, but at that time, I only skimmed through them without taking detailed notes. As a result, I failed to form a complete JavaSE knowledge system in my mind. Later, when I delved deeper into Java backend development, my weak foundation made it difficult for me to understand some code. Therefore, this year, I started re-watching this set of tutorial videos and used `Typora` to take notes in `Markdown` format systematically. Although this took me approximately one month, I strongly believe that for sake of becoming an excellent software engineer, one must not aim too high without a solid foundation. It is essential to build a strong programming base; otherwise, even if you "go fast," you will not "go far" in the long run!
