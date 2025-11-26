@@ -23,10 +23,10 @@ public class ServerReaderThread extends Thread {
             ps.println("<div style='color:red;font-size:160px;text-align:center'>黑马程序员666<div>");
 
             // 数据响应完后立即关闭资源
-
             socket.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
     }
 }
