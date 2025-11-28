@@ -3,13 +3,11 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="bookDao" class="com.zsh.dao.impl.BookDaoImpl"/>
+    <bean id="bookDao" class="com.zsh.dao.impl.BookDaoImpl"
+          init-method="init" destroy-method="destroy"/>
 
-    <!--name表示bean的别名，scope用于定义bean的作用范围，默认是singleton单例-->
-    <bean id="bookService"
-          name="service bookEbi"
-          class="com.zsh.service.impl.BookServiceImpl"
-          scope="prototype">
+    <bean id="bookService" class="com.zsh.service.impl.BookServiceImpl">
         <property name="bookDao" ref="bookDao"/>
     </bean>
+
 </beans>

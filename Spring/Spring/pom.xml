@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>01_quickstart</module>
+        <module>03_bean_instance</module>
     </modules>
 
     <properties>
