@@ -9,6 +9,14 @@
     <file url="file://$PROJECT_DIR$/03_bean_instance/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/04_bean_lifecycle/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/04_bean_lifecycle/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/05_di_setter/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/05_di_setter/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/06_di_constructor/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/06_di_constructor/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/07_di_autowire/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/07_di_autowire/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/08_di_collection/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/08_di_collection/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>

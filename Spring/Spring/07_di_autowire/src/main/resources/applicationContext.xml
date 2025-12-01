@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="bookDao" class="com.zsh.dao.impl.BookDaoImpl"/>
+    <bean id="bookDao2" class="com.zsh.dao.impl.BookDaoImpl"/>
+
+<!--    <bean id="bookService" class="com.zsh.service.impl.BookServiceImpl" autowire="byType"/>-->
+
+    <!--按名称自动装配，匹配的是id="bookDao"的bean-->
+    <bean id="bookService" class="com.zsh.service.impl.BookServiceImpl" autowire="byName"/>
+</beans>

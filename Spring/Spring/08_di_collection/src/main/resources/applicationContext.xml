@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="bookDao" class="com.zsh.dao.impl.BookDaoImpl">
+        <property name="zshArray">
+            <array>
+                <value>100</value>
+                <value>200</value>
+                <value>300</value>
+            </array>
+        </property>
+
+        <property name="zshList">
+            <list>
+                <value>zsh</value>
+                <value>zjl</value>
+                <value>zxj</value>
+                <value>zxj</value>
+            </list>
+        </property>
+
+        <property name="zshSet">
+            <set>
+                <value>apple</value>
+                <value>banana</value>
+                <value>strawberry</value>
+                <value>strawberry</value>
+                <!--由于Set元素不可重复，故会自动过滤2个重复的strawberry-->
+            </set>
+        </property>
+
+        <property name="zshMap">
+            <map>
+                <entry key="country" value="China"/>
+                <entry key="province" value="Guangdong"/>
+                <entry key="city" value="Swatow"/>
+            </map>
+        </property>
+
+        <property name="zshProperties">
+            <props>
+                <prop key="name">zsh</prop>
+                <prop key="sex">male</prop>
+                <prop key="height">175</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>
