@@ -144,6 +144,114 @@
 
 ##### P5 集合注入
 
++ `BookDaoImpl`:
+
+```java
+package com.zsh.dao.impl;
+
+import com.zsh.dao.BookDao;
+import java.util.*;
+
+public class BookDaoImpl implements BookDao {
+
+    private int[] zshArray;
+    private List<String> zshList;
+    private Set<String> zshSet;
+    private Map<String,String> zshMap;
+    private Properties zshProperties;
+
+    public void setZshArray(int[] zshArray) {
+        this.zshArray = zshArray;
+    }
+    public void setZshList(List<String> zshList) {
+        this.zshList = zshList;
+    }
+    public void setZshSet(Set<String> zshSet) {
+        this.zshSet = zshSet;
+    }
+    public void setZshMap(Map<String, String> zshMap) {
+        this.zshMap = zshMap;
+    }
+    public void setZshProperties(Properties zshProperties) {
+        this.zshProperties = zshProperties;
+    }
+
+    @Override
+    public void save() {
+        System.out.println("book dao save ...");
+        System.out.println("traverse Array: "+ Arrays.toString(zshArray));
+        System.out.println("traverse List: "+ zshList);
+        System.out.println("traverse Set: "+ zshSet);
+        System.out.println("traverse Map: "+ zshMap);
+        System.out.println("traverse Properties: "+ zshProperties);
+    }
+}
+```
+
++ `applicationContext.xml`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="bookDao" class="com.zsh.dao.impl.BookDaoImpl">
+        <property name="zshArray">
+            <array>
+                <value>100</value>
+                <value>200</value>
+                <value>300</value>
+            </array>
+        </property>
+
+        <property name="zshList">
+            <list>
+                <value>zsh</value>
+                <value>zjl</value>
+                <value>zxj</value>
+                <value>zxj</value>
+            </list>
+        </property>
+
+        <property name="zshSet">
+            <set>
+                <value>apple</value>
+                <value>banana</value>
+                <value>strawberry</value>
+                <value>strawberry</value>
+                <!--由于Set元素不可重复，故会自动过滤2个重复的strawberry-->
+            </set>
+        </property>
+
+        <property name="zshMap">
+            <map>
+                <entry key="country" value="China"/>
+                <entry key="province" value="Guangdong"/>
+                <entry key="city" value="Swatow"/>
+            </map>
+        </property>
+
+        <property name="zshProperties">
+            <props>
+                <prop key="name">zsh</prop>
+                <prop key="sex">male</prop>
+                <prop key="height">175</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>
+```
+
+
+
+##### P6 加载`properties`文件
+
+<img src="images/image-20251202004657637.png" alt="image-20251202004657637" style="zoom:67%;" />
+
+<img src="images/image-20251202005757493.png" alt="image-20251202005757493" style="zoom:67%;" />
+
 
 
 ---
@@ -152,7 +260,43 @@
 
 ### 2.容器基本操作
 
+#### 2.1 创建容器
 
+
+
+
+
+---
+
+
+
+#### 2.2 获取`bean`
+
+
+
+
+
+---
+
+
+
+#### 2.3 容器类层次结构
+
+
+
+
+
+---
+
+
+
+#### 2.4 `BeanFactory`
+
+
+
+
+
+---
 
 ---
 
@@ -162,6 +306,10 @@
 
 
 
+
+
+---
+
 ---
 
 
@@ -169,6 +317,10 @@
 ## 三、`AOP`
 
 
+
+
+
+---
 
 ---
 
@@ -178,8 +330,21 @@
 
 
 
+
+
+---
+
 ---
 
 
 
 ## 五、框架整合
+
+
+
+
+
+
+
+
+

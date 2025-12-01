@@ -12,6 +12,7 @@
         <option value="$PROJECT_DIR$/06_di_constructor/pom.xml" />
         <option value="$PROJECT_DIR$/07_di_autoware/pom.xml" />
         <option value="$PROJECT_DIR$/08_di_collection/pom.xml" />
+        <option value="$PROJECT_DIR$/07_di_autowire/pom.xml" />
       </list>
     </option>
   </component>
