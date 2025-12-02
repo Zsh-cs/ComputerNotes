@@ -262,27 +262,34 @@ public class BookDaoImpl implements BookDao {
 
 #### 2.1 创建容器
 
+##### P1 加载配置文件的两种方式
 
++ **通过类路径**：`ApplicationContext context = new ClassPathXmlApplicationContext("???.xml");`
++ **通过文件路径**：`ApplicationContext context = new FileSystemXmlApplicationContext("???.xml的绝对路径或本工程下的相对路径");`
 
+##### P2 加载多个配置文件
 
-
----
+`ApplicationContext context = new ClassPathXmlApplicationContext("bean1.xml", "bean2.xml");`
 
 
 
 #### 2.2 获取`bean`
 
-
-
-
-
----
++ 使用`bean`名称获取：`BookDao bookDao = (BookDao) context.getBean("bookDao")`
++ 使用`bean`名称获取并指定`bean`类型：`BookDao bookDao = context.getBean("bookDao", BookDao.class)`
++ 使用`bean`类型获取（注意该类型的`bean`在配置文件中必须是唯一的）：`BookDao bookDao = context.getBean(BookDao.class)`
 
 
 
 #### 2.3 容器类层次结构
 
+<img src="images/image-20251202225308596.png" alt="image-20251202225308596" style="zoom:80%;" />
 
+
+
+#### 2.4 `BeanFactory`
+
+<img src="images/image-20251202225441311.png" alt="image-20251202225441311" style="zoom:80%;" />
 
 
 
@@ -290,7 +297,141 @@ public class BookDaoImpl implements BookDao {
 
 
 
-#### 2.4 `BeanFactory`
+### 3.注解开发
+
+#### 3.1 注解开发定义`bean`
+
+##### P1 步骤
+
+Step1：使用`@Component`定义`bean`。
+
+```java
+@Component("bookDao")
+public class BookDaoImpl implements BookDao {
+}
+
+@Component
+public class BookServiceImpl implements BookService {
+}
+```
+
+Step2：核心配置文件中通过组件扫描加载`bean`。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+">
+    <context:component-scan base-package="com.zsh"/>
+
+</beans>
+```
+
+
+
+##### P2 Spring提供的三个衍生注解
+
+> [!Tip]
+>
+> 功能和`@Component`一模一样，只是增强了可读性。
+
++ `@Controller`：用于接口层`bean`定义。
++ `@Service`：用于业务层`bean`定义。
++ `@Repository`：用于数据层`bean`定义。
+
+
+
+---
+
+
+
+#### 3.2 纯注解开发（`Spring3.0+`）
+
+创建一个Java类`SpringConfig`来代替核心配置文件：
+
+```java
+package com.zsh.config;
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration// 代表这是个Spring配置类
+@ComponentScan("com.zsh")// 指定扫描路径，此注解只能添加一次，多个数据需用数组形式，如@ComponentScan({"com.zsh.dao", "com.zsh.service"})
+public class SpringConfig {
+}
+```
+
+重新编写测试类：
+
+```java
+package com.zsh;
+
+import com.zsh.config.SpringConfig;
+import com.zsh.dao.BookDao;
+import com.zsh.service.BookService;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class AppByPureAnnotation {
+    public static void main(String[] args) {
+        ApplicationContext context=new AnnotationConfigApplicationContext(SpringConfig.class);
+
+        BookDao bookDao=(BookDao) context.getBean("bookDao");
+        System.out.println(bookDao);
+        BookService bookService=context.getBean(BookService.class);
+        System.out.println(bookService);
+    }
+}
+```
+
+
+
+---
+
+
+
+#### 3.3 控制`Bean`的作用范围与生命周期
+
+<img src="images/image-20251202235944930.png" alt="image-20251202235944930" style="zoom:67%;" />
+
+<img src="images/image-20251202235854374.png" alt="image-20251202235854374" style="zoom:67%;" />
+
+
+
+---
+
+
+
+#### 3.4 依赖注入——自动装配
+
+##### P1 使用`@Autowired`注解开启按类型自动装配模式
+
+<img src="images/image-20251203000955416.png" alt="image-20251203000955416" style="zoom:67%;" />
+
+##### P2 使用`@Qualifier`注解按指定名称装配`bean`
+
+<img src="images/image-20251203001043319.png" alt="image-20251203001043319" style="zoom:67%;" />
+
+##### P3 使用`@Value`注解注入简单类型数据
+
+<img src="images/image-20251203001407923.png" alt="image-20251203001407923" style="zoom:67%;" />
+
+##### P4 使用`@PropertySource`注解加载属性文件
+
+<img src="images/image-20251203002211865.png" alt="image-20251203002211865" style="zoom: 60%;" />
+
+
+
+---
+
+
+
+#### 3.5 管理第三方`bean`
 
 
 

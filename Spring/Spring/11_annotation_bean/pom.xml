@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>01_quickstart</artifactId>
+    <artifactId>11_annotation_bean</artifactId>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
