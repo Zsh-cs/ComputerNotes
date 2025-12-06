@@ -433,7 +433,121 @@ public class AppByPureAnnotation {
 
 #### 3.5 管理第三方`bean`
 
+##### P1 使用`@Bean`注解来配置第三方`bean`
 
++ `SpringConfig`:
+
+  ```java
+  package com.zsh.config;
+  
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.context.annotation.Import;
+  
+  @Configuration// 代表这是个Spring配置类
+  @Import(JdbcConfig.class)// 导入配置
+  public class SpringConfig {
+  }
+  ```
+
++ `JdbcConfig`:（使用独立的配置类进行解耦合）
+
+  ```java
+  package com.zsh.config;
+  
+  import com.alibaba.druid.pool.DruidDataSource;
+  import org.springframework.context.annotation.Bean;
+  import javax.sql.DataSource;
+  
+  public class JdbcConfig {
+  
+      // 1.定义一个方法来获得要管理的第三方bean
+      // 2.添加@Bean表示该方法的返回值是一个bean
+      @Bean
+      public DataSource getDataSource(){
+          DruidDataSource dataSource=new DruidDataSource();
+          dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+          dataSource.setUrl("jdbc:mysql://localhost:3306/spring_db");
+          dataSource.setUsername("root");
+          dataSource.setPassword("123456");
+          return dataSource;
+      }
+  }
+  ```
+
+
+
+##### P2 为第三方`bean`进行依赖注入
+
++ 简单类型依赖注入：**设置成员变量**。
+
+  ```java
+  public class JdbcConfig {
+  
+      @Value("com.mysql.jdbc.Driver")
+      private String driver;
+      @Value("jdbc:mysql://localhost:3306/spring_db")
+      private String url;
+      @Value("root")
+      private String username;
+      @Value("123456")
+      private String password;
+  
+      @Bean
+      public DataSource getDataSource(){
+          DruidDataSource dataSource=new DruidDataSource();
+          dataSource.setDriverClassName(driver);
+          dataSource.setUrl(url);
+          dataSource.setUsername(username);
+          dataSource.setPassword(password);
+          return dataSource;
+      }
+  }
+  ```
+
++ 引用类型依赖注入：只需要为带有`@Bean`的**方法设置形参**即可，容器会根据类型**自动装配**对象。
+
+  > [!Tip]
+  >
+  > `BookDaoImpl`这个类记得加上`@Repository`注解，容器才可以自动装配。
+
+  ```java
+  public class JdbcConfig {
+  
+      @Bean
+      public DataSource getDataSource(BookDao bookDao){// 容器会自动装配bookDao(byType)
+          System.out.println(bookDao);
+          DruidDataSource dataSource=new DruidDataSource();
+          return dataSource;
+      }
+  }
+  ```
+
+
+
+---
+
+
+
+#### 3.6 `@Component`和`@Bean`的区别
+
+##### P1 概述
+
++ `@Component`是类级别注解，表示把这个类交给Spring容器管理。
++ `@Bean`是方法级别注解，表示把这个方法返回的对象交给Spring容器管理。
++ 两者都能创建Spring容器中的`Bean`，但用途完全不同。
+
+
+
+##### P2 对比表
+
+| 对比项         | `@Component`                                 | `@Bean`                                        |
+| -------------- | -------------------------------------------- | ---------------------------------------------- |
+| 注解位置       | 类                                           | 方法（通常在`@Configuration`类中）             |
+| `Bean`创建方式 | Spring自动扫描并实例化（反射调用无参构造器） | 方法返回对象由Spring注册                       |
+| 依赖注入       | 通过`@Autowired`、`@Value`等注解进行依赖注入 | 方法形参自动依赖注入                           |
+| 适用场景       | 自己编写的类，且可被Spring扫描到             | 第三方类、需要定制构造/初始化逻辑的`Bean`      |
+| 配置方式       | 需配合`@ComponentScan`扫描包路径             | 不需要组件扫描，只要执行配置类即可             |
+| 灵活性         | 相对固定，依赖无参构造器                     | 高度灵活，可在方法中写任意 Java 代码控制实例化 |
 
 
 
@@ -445,7 +559,168 @@ public class AppByPureAnnotation {
 
 ## 二、数据访问与集成
 
+### 1.`Spring`整合`MyBatis`
 
+#### 2.1 `mybatis-config.xml`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org/DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--初始化属性数据-->
+    <properties resource="jdbc.properties"></properties>
+
+    <!--初始化类型别名-->
+    <typeAliases>
+        <package name="com.zsh.domain"/>
+    </typeAliases>
+
+    <!--初始化数据源-->
+    <environments default="mysql">
+        <environment id="mysql">
+            <transactionManager type="JDBC"></transactionManager>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--初始化映射配置：随业务而改变-->
+    <mappers>
+        <package name="com.zsh.dao"/>
+    </mappers>
+</configuration>
+```
+
+分析可知，要想让`Spring`整合`MyBatis`，则要让`Spring`管理`SqlSessionFactory`对象。
+
+
+
+#### 2.2 代码重构
+
++ `SpringConfig`:
+
+  ```java
+  package com.zsh.config;
+  
+  import org.springframework.context.annotation.ComponentScan;
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.context.annotation.Import;
+  import org.springframework.context.annotation.PropertySource;
+  
+  @Configuration
+  @ComponentScan("com.zsh")
+  @PropertySource("classpath:jdbc.properties")
+  @Import({JdbcConfig.class, MybatisConfig.class})
+  public class SpringConfig {
+  }
+  ```
+
++ `JdbcConfig`:
+
+  ```java
+  package com.zsh.config;
+  
+  import com.alibaba.druid.pool.DruidDataSource;
+  import org.springframework.beans.factory.annotation.Value;
+  import org.springframework.context.annotation.Bean;
+  
+  import javax.sql.DataSource;
+  
+  public class JdbcConfig {
+      @Value("${jdbc.driver}")
+      private String driver;
+      @Value("${jdbc.url}")
+      private String url;
+      @Value("${jdbc.username}")
+      private String username;
+      @Value("${jdbc.password}")
+      private String password;
+  
+      @Bean
+      public DataSource dataSource(){
+          DruidDataSource dataSource=new DruidDataSource();
+          dataSource.setDriverClassName(driver);
+          dataSource.setUrl(url);
+          dataSource.setUsername(username);
+          dataSource.setPassword(password);
+          return dataSource;
+      }
+  }
+  ```
+
++ `MybatisConfig`:
+
+  <img src="images/image-20251206203057051.png" alt="image-20251206203057051" style="zoom:67%;" />
+
+  ```java
+  package com.zsh.config;
+  
+  import org.apache.ibatis.session.SqlSessionFactory;
+  import org.mybatis.spring.SqlSessionFactoryBean;
+  import org.mybatis.spring.mapper.MapperScannerConfigurer;
+  import org.springframework.context.annotation.Bean;
+  
+  import javax.sql.DataSource;
+  
+  public class MybatisConfig {
+  
+      @Bean
+      public SqlSessionFactoryBean sqlSessionFactoryBean(DataSource dataSource){
+          SqlSessionFactoryBean factoryBean=new SqlSessionFactoryBean();
+          factoryBean.setTypeAliasesPackage("com.zsh.domain");
+          factoryBean.setDataSource(dataSource);
+          return factoryBean;
+      }
+  
+      @Bean
+      public MapperScannerConfigurer mapperScannerConfigurer(){
+          MapperScannerConfigurer configurer=new MapperScannerConfigurer();
+          configurer.setBasePackage("com.zsh.dao");
+          return configurer;
+      }
+  }
+  ```
+
+
+
+---
+
+
+
+### 2.`Spring`整合`JUnit`
+
++ `AccountServiceTest`:
+
+```java
+package service;
+
+import com.zsh.config.SpringConfig;
+import com.zsh.service.AccountService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = SpringConfig.class)
+public class AccountServiceTest {
+
+    @Autowired
+    private AccountService accountService;
+
+    @Test
+    public void testFindById(){
+        System.out.println(accountService.findById(2));
+    }
+}
+```
 
 
 

@@ -34,7 +34,7 @@ public class BookDaoImpl implements BookDao {
 
     @Override
     public void save() {
-        System.out.println("book dao save ...");
+        System.out.println("book com.zsh.dao save ...");
 
         System.out.println("traverse Array: "+ Arrays.toString(zshArray));
         System.out.println("traverse List: "+ zshList);

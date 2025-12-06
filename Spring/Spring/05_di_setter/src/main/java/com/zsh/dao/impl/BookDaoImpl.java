@@ -13,6 +13,6 @@ public class BookDaoImpl implements BookDao {
 
     @Override
     public void save() {
-        System.out.println("book dao save to database "+databaseName+", connectionNum: "+connectionNum);
+        System.out.println("book com.zsh.dao save to database "+databaseName+", connectionNum: "+connectionNum);
     }
 }

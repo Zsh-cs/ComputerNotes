@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org/DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--初始化属性数据-->
+    <properties resource="jdbc.properties"></properties>
+
+    <!--初始化类型别名-->
+    <typeAliases>
+        <package name="com.zsh.domain"/>
+    </typeAliases>
+
+    <!--初始化数据源-->
+    <environments default="mysql">
+        <environment id="mysql">
+            <transactionManager type="JDBC"></transactionManager>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--初始化映射配置：随业务而改变-->
+    <mappers>
+        <package name="com.zsh.dao"/>
+    </mappers>
+</configuration>

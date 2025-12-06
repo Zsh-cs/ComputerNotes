@@ -5,6 +5,6 @@ import com.zsh.dao.BookDao;
 public class BookDaoImpl implements BookDao {
     @Override
     public void save() {
-        System.out.println("book dao save ...");
+        System.out.println("book com.zsh.dao save ...");
     }
 }

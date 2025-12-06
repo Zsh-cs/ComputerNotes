@@ -14,6 +14,7 @@
         <option value="$PROJECT_DIR$/08_di_collection/pom.xml" />
         <option value="$PROJECT_DIR$/07_di_autowire/pom.xml" />
         <option value="$PROJECT_DIR$/11_annotation_bean/pom.xml" />
+        <option value="$PROJECT_DIR$/10_annotation_bean/pom.xml" />
       </list>
     </option>
   </component>

@@ -6,7 +6,7 @@
 
     <!--2.配置bean：id表示bean的名称，class表示bean的类型-->
     <!--注意id在同一个context不能重复-->
-    <bean id="bookDao" class="com.zsh.dao.impl.BookDaoImpl"/>
+    <bean id="bookDao" class="com.zsh.com.zsh.dao.impl.BookDaoImpl"/>
     <bean id="bookService" class="com.zsh.service.impl.BookServiceImpl">
         <!--配置service与dao的关系-->
         <!--name表示配置bookService里哪一个成员变量，ref表示参照哪一个bean-->

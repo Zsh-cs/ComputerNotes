@@ -1,9 +1,6 @@
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import dao.BookDao;
+import com.zsh.dao.BookDao;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import javax.sql.DataSource;
 
 public class App {
     public static void main(String[] args) {
