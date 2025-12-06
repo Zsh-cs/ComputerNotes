@@ -15,6 +15,7 @@
         <module>11_annotation_datasource</module>
         <module>12_spring_mybatis</module>
         <module>13_spring_junit</module>
+        <module>14_aop_demo</module>
     </modules>
 
     <properties>
@@ -39,6 +40,12 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <version>5.3.22</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.4</version>
         </dependency>
 
         <dependency>

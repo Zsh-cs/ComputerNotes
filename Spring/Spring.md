@@ -732,7 +732,91 @@ public class AccountServiceTest {
 
 ## 三、`AOP`
 
+### 1.概述
 
++ `AOP(Aspect-Oriented Programming)`：面向切面编程。是一种编程范式，指导开发者如何组织程序结构。
++ **作用**：在**不惊动原有设计**的基础上为其进行功能增强（**无侵入式编程**）。
+
+
+
+### 2.核心概念
+
+> [!Important]
+>
+> 以下内容参考了Code With Sunil | Code Smarter, not harder在Medium平台发布的文章[Mastering Spring AOP (Aspect-Oriented Programming): A Comprehensive Guide with Real-World Examples](https://medium.com/@sunil17bbmp/mastering-spring-aop-aspect-oriented-programming-a-comprehensive-guide-with-real-world-examples-c5bca188b5df)
+>
+> ![image-20251207001137085](images/image-20251207001137085.png)
+
++ **连接点(Join Point)**：连接点是应用程序执行过程中的任意位置。
+  + 在Spring AOP中，连接点可以理解为方法的执行。
++ **切入点(Pointcut)**：切入点是一个匹配连接点的表达式，用于决定某个通知应该运行在哪些连接点上，它告诉Spring应该在何处应用你的切面。
+  + 在Spring AOP中，一个切入点可以只描述一个具体方法，也可以匹配多个方法。
+    + 一个具体方法：`com.zsh.dao`包下的`BookDao`接口中的`public void save()`方法。
+    + 匹配多个方法：所有`save`方法，所有`getXxx`方法，所有`xxxDao`方法，所有带有一个形参的方法……
+  + **注意**：切入点范围小于连接点范围，切入点包含于连接点中。
++ **通知(Advice)**：通知是你希望在切入点运行的代码，例如在方法运行之前先记录日志。
+  + 在Spring AOP中，通知最终以方法的形式呈现。
++ **通知类(Advice Class)**：专门定义通知的类。
++ **切面(Aspect)**：切面是一个包含了多个类通用功能代码的模块，例如日志记录。它描述了通知与切入点的对应关系。
+  + 在Spring AOP中，可以使用`@Aspect`注解或通过`XML`配置的方式来创建切面。
+
+<img src="images/image-20251206235754356.png" alt="image-20251206235754356" style="zoom: 80%;" />
+
+
+
+### 3.实现步骤
+
+1. 在`pom.xml`中导入`AOP`相关坐标。注意若已经导入了`spring-context`的坐标，就不用再导入`spring-aop`的坐标了，因为后者包含于前者。
+
+   ```xml
+   <dependency>
+       <groupId>org.aspectj</groupId>
+       <artifactId>aspectjweaver</artifactId>
+       <version>自己选一个合适的版本号</version>
+   </dependency>
+   ```
+
+2. 制作连接点方法（原始操作，`Dao`接口与实现类）。
+
+3. 定义通知类，在通知类中编写共性功能，即通知。
+
+4. 定义切入点，切入点依托于一个没有实际意义的方法进行，即无参数、无返回值、方法体无具体逻辑的方法。
+
+   ```java
+   public class MyAdvice {
+   
+       @Pointcut("execution(void com.zsh.dao.BookDao.update())")
+       private void pointcutMethod(){}
+   
+   }
+   ```
+
+5. 定义切面，绑定通知与切入点，同时将通知类交由Spring容器进行管理。
+
+   ```java
+   @Component
+   @Aspect// 用于创建切面
+   public class MyAdvice {
+   
+       @Pointcut("execution(void com.zsh.dao.BookDao.update())")
+       private void pointcutMethod(){}
+   
+       @Before("pointcutMethod()")
+       public void before(){
+           System.out.println(System.currentTimeMillis());
+       }
+   }
+   ```
+
+6. 在`SpringConfig`中开启Spring对`AOP`注解驱动的支持。
+
+   ```java
+   @Configuration
+   @ComponentScan("com.zsh")
+   @EnableAspectJAutoProxy// 告诉Spring程序中存在用注解开发的AOP
+   public class SpringConfig {
+   }
+   ```
 
 
 
