@@ -16,6 +16,9 @@
         <module>12_spring_mybatis</module>
         <module>13_spring_junit</module>
         <module>14_aop_demo</module>
+        <module>15_aop_service_speed</module>
+        <module>16_aop_advice_data</module>
+        <module>17_aop_trim_password</module>
     </modules>
 
     <properties>

@@ -8,6 +8,10 @@
 
 
 
+[TOC]
+
+
+
 ## 一、核心容器
 
 ### 1.`IoC/DI`
@@ -739,6 +743,10 @@ public class AccountServiceTest {
 
 
 
+---
+
+
+
 ### 2.核心概念
 
 > [!Important]
@@ -761,6 +769,10 @@ public class AccountServiceTest {
   + 在Spring AOP中，可以使用`@Aspect`注解或通过`XML`配置的方式来创建切面。
 
 <img src="images/image-20251206235754356.png" alt="image-20251206235754356" style="zoom: 80%;" />
+
+
+
+---
 
 
 
@@ -822,6 +834,174 @@ public class AccountServiceTest {
 
 ---
 
+
+
+### 4.`AOP`工作流程
+
+1. 启动Spring容器。
+2. 读取所有绑定了通知的切入点。
+3. 初始化`bean`，判定`bean`对应的类中的方法是否匹配到任意切入点。
+   + 若匹配失败，则正常创建`bean`对象。
+   + 若匹配成功，则创建`bean`对象（称作原始对象或**目标对象**）的**代理对象**。
+4. 获取`bean`。
+   + 若上一步匹配失败，则正常调用方法并执行，完成操作。
+   + 若上一步匹配成功，则根据代理对象的运行模式运行原始方法与增强内容，完成操作。
+
+
+
+---
+
+
+
+### 5.切入点表达式
+
+#### 5.1 标准格式
+
+`动作关键字(修饰符 返回值 包名.类/接口名.方法名(方法形参类型) 异常名)`，其中修饰符、异常名可省略。
+
+example: `execution(public User com.zsh.service.UserService.findById(int) RuntimeException)`。
+
+动作关键字用于描述切入点的行为动作，`execution`表示执行到指定切入点。
+
+#### 5.2 通配符
+
+使用通配符可以快速描述切入点：
+
++ `*`：单个任意符号，可以独立出现，也可以作为前缀或后缀匹配符出现。
+  + `execution(public * com.zsh.*.UserService.find*(*))`：匹配`com.zsh`包下任意子包中的`UserService`中，所有以`find`为开头的，返回值任意且只有一个形参的方法。
++ `..`：任意符号重复多次，可以独立出现，常用于简化包名与形参的书写。
+  + `execution(public User com..UserService.findById(..))`：匹配`com`包下任意子包中的`UserService`中，所有名称为`findById`的方法，形参数量不限。
++ `+`：专门用于匹配子类/实现类类型。
+  + `execution(* *..*Service+.*(..))`：匹配任意包下的以`Service`为结尾的类/接口及其子类/实现类中的**所有方法**，即任意业务层接口。
+
+#### 5.3 书写技巧
+
+- 所有代码按照标准规范开发，否则以下技巧全部失效。
+- 描述切入点通常描述接口，而不描述实现类，避免紧耦合。
+- 针对接口开发，修饰符均采用`public`描述。
+- 返回值类型对于**增、删、改**类使用精准类型加速匹配，对于**查询**类使用`*`通配符快速描述。
+- 包名书写尽量不使用`..`匹配，效率过低，建议使用`*`做单个包描述匹配，或精准匹配。
+- 若接口名/类名名称与模块相关，则采用`*`匹配，例如`UserService`书写成`*Service`，绑定业务层接口名。
+- 方法名书写以动词进行精准匹配，名词采用`*`匹配，例如`getById`书写成`getBy*`，`selectAll`书写成`selectAll`。
+- 参数规则较为复杂，根据业务方法灵活调整。
+- 通常不使用异常作为匹配规则。
+
+
+
+---
+
+
+
+### 6.通知类型
+
+#### 6.1 前置通知
+
+![image-20251207150547750](images/image-20251207150547750.png)
+
+#### 6.2 后置通知
+
+![image-20251207150619885](images/image-20251207150619885.png)
+
+#### 6.3 环绕通知（重点）
+
+![image-20251207150637646](images/image-20251207150637646.png)
+
+![image-20251207150712535](images/image-20251207150712535.png)
+
+#### 6.4 返回后通知（了解）
+
+![image-20251207151024926](images/image-20251207151024926.png)
+
+#### 6.5 抛出异常后通知（了解）
+
+![image-20251207151109574](images/image-20251207151109574.png)
+
+
+
+---
+
+
+
+### 7.从通知中获取数据
+
+#### 7.1 获取参数
+
++ `JoinPoint`：描述了连接点方法的运行状态，可以获取到原始方法的调用参数（通过`getArgs`方法），适用于前置、后置、返回后、抛出异常后通知。
++ `ProceedingJoinPoint`：是`JoinPoint`的子类，适用于环绕通知。
+
+> [!Tip]
+>
+> 如何通过`ProceedingJoinPoint`修改用户传入的参数？
+>
+> ```java
+> @Around("pct()")
+>     public Object around(ProceedingJoinPoint pjp) throws Throwable {
+>         // 获取用户传入的参数
+>         Object[] args = pjp.getArgs();
+>         
+>         // 修改参数
+>         args[索引] = ...;// 填入具体修改逻辑
+> 
+>         // 调用ProceedingJoinPoint提供的有参重载方法proceed(Object[] args)，
+>         // 传入修改后的参数
+>         Object ret=pjp.proceed(args);
+>         return ret;
+>     }
+> ```
+
+#### 7.2 获取返回值
+
++ 返回后通知：
+
+  ```java
+  @AfterReturning(value = "pct()",returning = "ret")// 指定ret用于接收原始方法的返回值
+  public void afterReturning(Object ret){
+      System.out.println("afterReturning advice ...");
+      System.out.println("ret: "+ret);
+  }
+  ```
+
++ 环绕通知：
+
+  ```java
+  @Around("pct()")
+  public Object around(ProceedingJoinPoint pjp) throws Throwable {
+      Object ret=pjp.proceed();
+      return ret;
+  }
+  ```
+
+#### 7.3 获取异常
+
++ 抛出异常后通知：
+
+  ```java
+  @AfterThrowing(value = "pct()",throwing = "t")// 指定t用于接收原始方法的异常
+  public void afterThrowing(Throwable t){
+      System.out.println("afterThrowing advice ...");
+      System.out.println("exception: "+t);
+  }
+  ```
+
++ 环绕通知：
+
+  ```java
+  @Around("pct()")
+  public Object around(ProceedingJoinPoint pjp) throws Throwable {
+      Object ret = null;
+      try {
+          ret = pjp.proceed();
+      } catch(Throwable t) {
+          t.printStackTrace();
+      }
+      return ret;
+  }
+  ```
+
+
+
+---
+
 ---
 
 
@@ -832,13 +1012,7 @@ public class AccountServiceTest {
 
 
 
----
 
----
-
-
-
-## 五、框架整合
 
 
 

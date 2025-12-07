@@ -8,16 +8,7 @@ public class BookDaoImpl implements BookDao {
 
     @Override
     public void save() {
-        System.out.println(System.currentTimeMillis());
         System.out.println("book dao save ...");
-
-//        Long startTime=System.currentTimeMillis();
-//        for (int i = 0; i < 10000; i++) {
-//            System.out.println("book dao save ...");
-//        }
-//        Long endTime=System.currentTimeMillis();
-//        Long time=endTime-startTime;
-//        System.out.println("执行10000次save操作所消耗的时间："+time+" ms");
     }
 
     @Override
@@ -26,8 +17,9 @@ public class BookDaoImpl implements BookDao {
     }
 
     @Override
-    public void delete() {
+    public String delete() {
         System.out.println("book dao delete ...");
+        return "delete successfully!";
     }
 
     @Override
