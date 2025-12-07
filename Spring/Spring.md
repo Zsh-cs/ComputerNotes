@@ -1008,11 +1008,132 @@ example: `execution(public User com.zsh.service.UserService.findById(int) Runtim
 
 ## 四、事务
 
+### 1.概述
+
+> [!Important]
+>
+> 版权声明：以下内容摘选自CSDN博主「重生之我在成电转码」的原创文章，遵循CC 4.0 BY-SA版权协议，原文链接：https://blog.csdn.net/m0_69529796/article/details/146242971
+
+事务(Transaction)是数据库操作的最小工作单元，保证多个SQL语句作为一个整体执行，要么全部成功，要么全部失败，确保数据的一致性和完整性。
+
+例如，在银行转账的场景中：第一步：从A账户扣除100元；第二步：向B账户增加100元。
+
+如果第一步执行成功，但第二步失败（比如数据库崩溃），账户A的钱就凭空少了，这会导致数据不一致。事务可以保证这两个操作要么都成功，要么都回滚（撤销），避免数据错误。
 
 
 
+### 2.Spring事务
+
++ **作用**：在数据层或业务层上，保障一系列的数据库操作要么同时成功，要么同时失败。
+
++ Spring提供了一个接口`PlatformTransactionManager`：
+
+  ```java
+  public interface PlatformTransactionManager{
+      void commit(TransactionStatus status) throws TransactionException;// 提交事务
+      void rollback(TransactionStatus status) throws TransactionException;// 回滚事务
+  }
+  ```
+
++ 针对`JDBC`的事物，Spring提供了上述接口的一个实现类`DataSourceTransactionManager`。
 
 
+
+---
+
+
+
+### 3.开启事务的步骤——案例：银行转账
+
+#### 3.1 在业务层接口上添加Spring事务管理
+
+> [!CAUTION]
+>
+> Spring注解式事务退出添加在业务层接口，而非业务层实现类，以降低耦合。
+>
+> `@Transactional`可以添加在接口上，也可以添加在单个方法上。
+
+```java
+@Transactional// 开启事务
+public interface AccountService {
+    public void transfer(String out, String in, Double money);
+}
+```
+
+
+
+#### 3.2 设置事务管理器
+
+```java
+public class JdbcConfig {
+    @Value("${jdbc.driver}")
+    private String driver;
+    @Value("${jdbc.url}")
+    private String url;
+    @Value("${jdbc.username}")
+    private String username;
+    @Value("${jdbc.password}")
+    private String password;
+
+    @Bean
+    public DataSource dataSource(){
+        DruidDataSource dataSource=new DruidDataSource();
+        dataSource.setDriverClassName(driver);
+        dataSource.setUrl(url);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
+        return dataSource;
+    }
+
+    @Bean
+    // 事务管理器，引用类型DataSource通过形参自动注入
+    public PlatformTransactionManager transactionManager(DataSource dataSource){
+        DataSourceTransactionManager manager=new DataSourceTransactionManager();
+        manager.setDataSource(dataSource);
+        return manager;
+    }
+}
+```
+
+
+
+#### 3.3 开启注解式事务驱动
+
+```java
+@Configuration
+@ComponentScan("com.zsh")
+@PropertySource("classpath:jdbc.properties")
+@Import({JdbcConfig.class, MybatisConfig.class})
+@EnableTransactionManagement// 允许开启事务管理器
+public class SpringConfig {
+}
+```
+
+
+
+---
+
+
+
+### 4.Spring事务角色
+
+![image-20251208001656981](images/image-20251208001656981.png)
+
+
+
+### 5.Spring事务相关配置
+
+| 属性                   | 作用                         | 示例                                     |
+| ---------------------- | ---------------------------- | ---------------------------------------- |
+| readOnly               | 设置是否为只读事务           | readOnly=true（只读事务）                |
+| timeout                | 设置事务超时时间             | timeout=-1（永不超时）                   |
+| rollbackFor            | 设置事务回滚异常（class）    | rollbackFor={NullPointException.class}   |
+| rollbackForClassName   | 设置事务回滚异常（String）   | 同上，但格式为字符串                     |
+| noRollbackFor          | 设置事务不回滚异常（class）  | noRollbackFor={NullPointException.class} |
+| noRollbackForClassName | 设置事务不回滚异常（String） | 同上，但格式为字符串                     |
+| propagation            | 设置事务传播行为             | 见下                                     |
+
+<img src="images/image-20251208005508752.png" alt="image-20251208005508752"  />
 
 
 

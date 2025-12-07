@@ -35,6 +35,8 @@
     <file url="file://$PROJECT_DIR$/16_aop_advice_data/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/17_aop_trim_password/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/17_aop_trim_password/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/18_transaction_transfer/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/18_transaction_transfer/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>

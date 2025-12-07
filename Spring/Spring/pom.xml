@@ -19,6 +19,7 @@
         <module>15_aop_service_speed</module>
         <module>16_aop_advice_data</module>
         <module>17_aop_trim_password</module>
+        <module>18_transaction_transfer</module>
     </modules>
 
     <properties>
