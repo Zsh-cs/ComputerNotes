@@ -1,5 +1,9 @@
 # MyBatis
 
+> 鸣谢：波波酱老师【1小时入门MyBatis框架-CRUD极简案例教学-特种兵后端系列】https://www.bilibili.com/video/BV1HH4y1o7Wr?vd_source=b7f14ba5e783353d06a99352d23ebca9
+>
+> ![image-20251208150356479](images/image-20251208150356479.png)
+
 ### 一、简介
 
 <img src="assets\1658881455780.png" alt="1658881455780" style="zoom:60%;" />
