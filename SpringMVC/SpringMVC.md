@@ -272,17 +272,6 @@ public class ServletContainerInitConfig extends AbstractAnnotationConfigDispatch
 
 ---
 
-
-
-### 5.Postman
-
-+ Postman是一款功能强大的用于网页调试和发送网页HTTP请求的Chrome插件，常用于进行接口测试。
-+ **特征**：简单、实用、美观、大方。
-
-
-
----
-
 ---
 
 
@@ -291,7 +280,28 @@ public class ServletContainerInitConfig extends AbstractAnnotationConfigDispatch
 
 ### 1.请求映射路径
 
+`@RequestMapping`注解既可用于方法上，也可用于整个类上，这时候的作用是统一设置当前类的方法的请求映射路径前缀。示例如下：
 
+```java
+@Controller
+@RequestMapping("/user")// 请求路径前缀
+public class UserController {
+
+    @RequestMapping("/save")
+    @ResponseBody
+    public String save(){
+        System.out.println("user save ...");
+        return "{'module':'user save'}";
+    }
+
+    @RequestMapping("/delete")
+    @ResponseBody
+    public String delete(){
+        System.out.println("user delete ...");
+        return "{'module':'user delete'}";
+    }
+}
+```
 
 
 
@@ -299,9 +309,47 @@ public class ServletContainerInitConfig extends AbstractAnnotationConfigDispatch
 
 
 
-### 2.请求参数
+### 2.GET请求传参
+
+#### 2.1 普通参数
+
+##### P1 概述
+
+**传参方式**：url地址直接传参，地址参数名与形参名一致，在方法签名里定义形参即可接收参数。
+
+<img src="images/image-20251218221400078.png" alt="image-20251218221400078" style="zoom: 80%;" />
+
+```java
+@Controller
+public class UserController {
+    // 普通参数
+    @RequestMapping("/commonParam")
+    @ResponseBody
+    public String commonParam(String name, int age){
+        System.out.println("common param: name ==> "+name);
+        System.out.println("common param: age ==> "+age);
+        return "{'module':'common param'}";
+    }
+}
+```
 
 
+
+##### P2 请求参数名与形参名不一致的情况：使用`@RequestParam`注解
+
+```java
+@Controller
+public class UserController {
+    // 普通参数：请求参数名与形参名不一致的情况
+    @RequestMapping("/commonParamDifferentName")
+    @ResponseBody
+    public String commonParamDifferentName(@RequestParam("name") String userName, int age){
+        System.out.println("common param: name ==> "+userName);
+        System.out.println("common param: age ==> "+age);
+        return "{'module':'common param different name'}";
+    }
+}
+```
 
 
 
@@ -309,9 +357,288 @@ public class ServletContainerInitConfig extends AbstractAnnotationConfigDispatch
 
 
 
-### 3.日期类型参数传递
+#### 2.2 POJO参数
+
+> [!Tip]
+>
+> POJO(Plain Ordinary Java Object)：简单的Java对象，实际上就是普通的JavaBean，只是为了避免和EJB混淆所创造的简称。
+
+<img src="images/image-20251218232734716.png" alt="image-20251218232734716" style="zoom:80%;" />
+
+```java
+@Controller
+public class UserController {
+    // POJO参数
+    @RequestMapping("/pojoParam")
+    @ResponseBody
+    public String pojoParam(User user){
+        System.out.println("pojo param: user ==> "+user);
+        return "{'module':'pojo param'}";
+    }
+}
+```
 
 
+
+---
+
+
+
+#### 2.3 嵌套POJO参数
+
+<img src="images/image-20251218232857191.png" alt="image-20251218232857191" style="zoom:80%;" />
+
+```java
+@Controller
+public class UserController {
+    // 嵌套POJO参数
+    @RequestMapping("/pojoContainsPojoParam")
+    @ResponseBody
+    public String pojoContainsPojoParam(User user){
+        System.out.println("pojo param: user ==> "+user);
+        return "{'module':'pojo contains pojo param'}";
+    }
+}
+```
+
+
+
+---
+
+
+
+#### 2.4 数组参数
+
+<img src="images/image-20251219002015841.png" alt="image-20251219002015841" style="zoom:80%;" />
+
+```java
+@Controller
+public class UserController {
+    // 数组参数
+    @RequestMapping("/arrayParam")
+    @ResponseBody
+    public String arrayParam(String[] hobbies){
+        System.out.println("array param: hobbies ==> "+ Arrays.toString(hobbies));
+        return "{'module':'array param'}";
+    }
+}
+```
+
+
+
+---
+
+
+
+#### 2.5 集合参数
+
+<img src="images/image-20251219002817908.png" alt="image-20251219002817908" style="zoom:80%;" />
+
+```java
+@Controller
+public class UserController {
+    // 集合参数
+    @RequestMapping("/listParam")
+    @ResponseBody
+    public String listParam(@RequestParam List<String> hobbies){// 此处必须加@RequestParam注解来绑定参数关系，否则报错
+        System.out.println("list param: hobbies ==> "+ hobbies);
+        return "{'module':'list param'}";
+    }
+}
+```
+
+
+
+---
+
+
+
+#### 2.6 通过json格式传参
+
+##### P0 准备工作
+
+首先要导入json坐标，才能进行接下来的步骤！
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>版本</version>
+    </dependency>
+</dependencies>
+```
+
+其次要在`SpringMvcConfig`中新增注解`@EnableWebMvc`！
+
+```java
+@Configuration
+@ComponentScan("com.zsh.controller")
+@EnableWebMvc// 其中一个功能：对json数据进行自动类型转换
+public class SpringMvcConfig {
+}
+```
+
+
+
+##### P1 集合参数
+
+<img src="images/image-20251219005548093.png" alt="image-20251219005548093" style="zoom:80%;" />
+
+```java
+@Controller
+public class UserController {   
+    // 集合参数：json
+    @RequestMapping("/listParamForJson")
+    @ResponseBody
+    public String listParamForJson(@RequestBody List<String> hobbies){// 此处必须加@RequestBody注解来绑定参数关系
+        System.out.println("list param json: hobbies ==> " + hobbies);
+        return "{'module':'list param for json'}";
+    }
+}
+```
+
+
+
+##### P2 POJO参数
+
+<img src="images/image-20251219010120485.png" alt="image-20251219010120485" style="zoom:80%;" />
+
+```java
+@Controller
+public class UserController {
+    // POJO参数：json
+    @RequestMapping("/pojoParamForJson")
+    @ResponseBody
+    public String pojoParamForJson(@RequestBody User user){// 此处必须加@RequestBody注解来绑定参数关系
+        System.out.println("pojo param json: user ==> " + user);
+        return "{'module':'pojo param for json'}";
+    }
+}
+```
+
+
+
+##### P3 POJO集合参数
+
+<img src="images/image-20251219010517884.png" alt="image-20251219010517884" style="zoom:80%;" />
+
+```java
+@Controller
+public class UserController {
+    // POJO集合参数：json
+    @RequestMapping("/pojoListParamForJson")
+    @ResponseBody
+    public String pojoListParamForJson(@RequestBody List<User> users){// 此处必须加@RequestBody注解来绑定参数关系
+        System.out.println("pojo list param json: users ==> " + users);
+        return "{'module':'pojo list param for json'}";
+    }
+}
+```
+
+
+
+---
+
+
+
+#### 2.7 日期参数
+
+> [!Tip]
+>
+> Spring默认的标准日期格式是`yyyy/MM/dd`。
+
+<img src="images/image-20251219012159976.png" alt="image-20251219012159976" style="zoom:80%;" />
+
+```java
+@Controller
+public class UserController {
+    // 日期参数
+    @RequestMapping("/dateParam")
+    @ResponseBody
+    public String dateParam(
+            Date date1,
+            @DateTimeFormat(pattern = "yyyy-MM-dd") Date date2,
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date date3
+    ){
+        System.out.println("date param: date1 ==> "+date1);
+        System.out.println("date param: date2(yyyy-MM-dd) ==> "+date2);
+        System.out.println("date param: date3(yyyy-MM-dd HH:mm:ss) ==> "+date3);
+        return "{'module':'date param'}";
+    }
+}
+```
+
+
+
+---
+
+
+
+### 3.POST请求传参
+
+#### P1 概述
+
+**传参方式**：请求体里通过`x-www-for-urlencoded`表单传参，表单参数名与形参名一致，在方法签名里定义形参即可接收参数。
+
+<img src="images/image-20251218221639045.png" alt="image-20251218221639045" style="zoom:80%;" />
+
+```java
+@Controller
+public class UserController {
+
+    // 普通参数
+    @RequestMapping("/commonParam")
+    @ResponseBody
+    public String commonParam(String name, int age){
+        System.out.println("common param: name ==> "+name);
+        System.out.println("common param: age ==> "+age);
+        return "{'module':'common param'}";
+    }
+}
+```
+
+
+
+#### P2 POST请求中文乱码处理
+
+```java
+public class ServletContainerInitConfig extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+    @Override
+    protected Class<?>[] getServletConfigClasses() {
+        return new Class[]{SpringMvcConfig.class};
+    }
+
+    @Override
+    protected String[] getServletMappings() {
+        return new String[]{"/"};
+    }
+
+    @Override
+    protected Class<?>[] getRootConfigClasses() {
+        return new Class[0];
+    }
+
+    // POST请求中文乱码处理：设置过滤器
+    @Override
+    protected Filter[] getServletFilters() {
+        CharacterEncodingFilter filter=new CharacterEncodingFilter();
+        filter.setEncoding("UTF-8");
+        return new Filter[]{filter};
+    }
+}
+```
+
+
+
+---
+
+
+
+#### 2.8 类型转换器
+
+<img src="images/image-20251219012440683.png" alt="image-20251219012440683" style="zoom: 80%;" />
 
 
 
