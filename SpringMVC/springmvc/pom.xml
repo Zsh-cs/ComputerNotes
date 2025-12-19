@@ -12,6 +12,9 @@
         <module>01_quickstart</module>
         <module>02_request_mapping</module>
         <module>03_request_param</module>
+        <module>04_response</module>
+        <module>05_REST</module>
+        <module>06_REST_case</module>
     </modules>
 
     <dependencies>

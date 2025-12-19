@@ -278,7 +278,7 @@ public class ServletContainerInitConfig extends AbstractAnnotationConfigDispatch
 
 ## 三、请求与响应
 
-### 1.请求映射路径
+### 1.请求映射路径：`@RequestMapping`
 
 `@RequestMapping`注解既可用于方法上，也可用于整个类上，这时候的作用是统一设置当前类的方法的请求映射路径前缀。示例如下：
 
@@ -335,7 +335,7 @@ public class UserController {
 
 
 
-##### P2 请求参数名与形参名不一致的情况：使用`@RequestParam`注解
+##### P2 请求参数名与形参名不一致的情况：`@RequestParam`
 
 ```java
 @Controller
@@ -430,7 +430,7 @@ public class UserController {
 
 
 
-#### 2.5 集合参数
+#### 2.5 集合参数：`@RequestParam`
 
 <img src="images/image-20251219002817908.png" alt="image-20251219002817908" style="zoom:80%;" />
 
@@ -453,7 +453,7 @@ public class UserController {
 
 
 
-#### 2.6 通过json格式传参
+#### 2.6 通过json格式传参：`@RequestBody`
 
 ##### P0 准备工作
 
@@ -647,6 +647,277 @@ public class ServletContainerInitConfig extends AbstractAnnotationConfigDispatch
 
 
 ### 4.响应json数据
+
+#### 4.0 准备工作
+
+首先要导入json坐标，才能进行接下来的步骤！
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>版本</version>
+    </dependency>
+</dependencies>
+```
+
+其次要在`SpringMvcConfig`中新增注解`@EnableWebMvc`！
+
+```java
+@Configuration
+@ComponentScan("com.zsh.controller")
+@EnableWebMvc// 其中一个功能：对json数据进行自动类型转换
+public class SpringMvcConfig {
+}
+```
+
+
+
+#### 4.1 代码演示
+
++ `page.jsp`:
+
+  ```jsp
+  <html>
+  <body>
+  <h2>Hello SpringMVC!</h2>
+  </body>
+  </html>
+  ```
+
++ `UserController`:
+
+  ```java
+  @Controller
+  public class UserController {
+      // 响应页面/跳转页面
+      @RequestMapping("/toJumpPage")
+      public String toJumpPage(){
+          System.out.println("jump page");
+          return "page.jsp";
+      }
+  
+      // 响应文本数据
+      @RequestMapping("/toText")
+      @ResponseBody
+      public String toText(){
+          System.out.println("return text");
+          return "response text";
+      }
+  
+      // 响应POJO：json
+      @RequestMapping("/toJsonPojo")
+      @ResponseBody
+      public User toJsonPojo(){
+          System.out.println("return json pojo");
+          User user=new User("zsh",999);
+          return user;
+      }
+  
+      // 响应POJO集合：json
+      @RequestMapping("/toJsonPojoList")
+      @ResponseBody
+      public List<User> toJsonPojoList(){
+          System.out.println("return json pojo list");
+          User user1=new User("aj",6);
+          User user2=new User("swift",52);
+          List<User> users=new ArrayList<>();
+          users.add(user1);
+          users.add(user2);
+          return users;
+      }
+  }
+  ```
+
+
+
+#### 4.2 `@ResponseBody`注解
+
+<img src="images/image-20251219152728585.png" alt="image-20251219152728585" style="zoom:67%;" />
+
+
+
+---
+
+---
+
+
+
+## 四、REST风格
+
+> [!Tip]
+>
+> REST(Representational State Transfer)：表征性状态转换。
+>
+> RESTful：使用REST风格对资源进行访问。
+
+### 1.简介
+
++ 传统风格 vs REST风格：
+
+  + 传统风格的资源描述形式：
+    + http://localhost/user/getById?id=1
+    + http://localhost/user/saveUser
+  + REST风格的资源描述形式：
+    + http://localhost/user/1
+    + http://localhost/user
+
++ REST风格优点：
+
+  + 隐藏资源的访问行为，无法通过url地址得知用户对资源执行何种操作。
+  + 简化书写。
+
++ 常见的REST风格的资源描述形式：
+
+  | url地址                  | 说明               | 行为动作（用于区分） |
+  | ------------------------ | ------------------ | -------------------- |
+  | http://localhost/users   | 查询全部用户信息。 | GET                  |
+  | http://localhost/users/1 | 查询指定用户信息。 | GET                  |
+  | http://localhost/users   | 添加用户信息。     | POST                 |
+  | http://localhost/users   | 修改用户信息。     | PUT                  |
+  | http://localhost/users/1 | 删除指定用户信息。 | DELETE               |
+
++ **注意事项**：上述行为动作只是约定方式，而非规范，因此称作REST风格而不是REST规范。描述模块的名称通常使用复数，表示此类资源，而非单个资源，例如：users、books、accounts。
+
+
+
+---
+
+
+
+### 2.RESTful入门案例：`@PathVariable`
+
+#### 2.1 代码演示
+
+```java
+@Controller
+@RequestMapping("/users")// 请求路径前缀
+public class UserController {
+
+    @RequestMapping(method = RequestMethod.POST)
+    @ResponseBody
+    public String save(@RequestBody User user) {
+        System.out.println("user save ... " + user);
+        return "{'module':'user save'}";
+    }
+
+    // 我已设定了请求路径前缀
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public String delete(@PathVariable Integer id) {// @PathVariable表示从url地址中取出id这个变量的值
+        System.out.println("user delete ... " + id);
+        return "{'module':'user delete'}";
+    }
+
+    @RequestMapping(method = RequestMethod.PUT)
+    @ResponseBody
+    public String update(@RequestBody User user) {
+        System.out.println("user update ... " + user);
+        return "{'module':'user update'}";
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public String getById(@PathVariable Integer id) {
+        System.out.println("user getById ... " + id);
+        return "{'module':'user getById'}";
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseBody
+    public String getAll() {
+        System.out.println("user getAll ...");
+        return "{'module':'user getAll'}";
+    }
+
+}
+```
+
+
+
+#### 2.2 注解区别
+
+|      注解       |                     作用                     |                        适用场景                         |
+| :-------------: | :------------------------------------------: | :-----------------------------------------------------: |
+| `@RequestParam` |          接收url地址传参或表单传参           |                  发送非json格式的数据                   |
+| `@RequestBody`  |                 接收json传参                 |          发送的请求参数超过1个且以json格式为主          |
+| `@PathVariable` | 接收路径参数，使用`{参数名称}`来描述路径参数 | 采用RESTful进行开发，且参数数量较少。通常用于传递id值。 |
+
+
+
+---
+
+
+
+### 3.RESTful快速开发：`@RestController`、`@XxxMapping`
+
+```java
+@RestController// 等价于@Controller + @ResponseBody
+@RequestMapping("/books")
+public class BookController {
+
+//    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
+    public String save(@RequestBody Book book) {
+        System.out.println("book save ... " + book);
+        return "{'module':'book save'}";
+    }
+
+//    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable Integer id) {// @PathVariable表示从url地址中取出id这个变量的值
+        System.out.println("book delete ... " + id);
+        return "{'module':'book delete'}";
+    }
+
+    @PutMapping
+    public String update(@RequestBody Book book) {
+        System.out.println("book update ... " + book);
+        return "{'module':'book update'}";
+    }
+
+    @GetMapping("/{id}")
+    public String getById(@PathVariable Integer id) {
+        System.out.println("book getById ... " + id);
+        return "{'module':'book getById'}";
+    }
+
+    @GetMapping
+    public String getAll() {
+        System.out.println("book getAll ...");
+        return "{'module':'book getAll'}";
+    }
+}
+```
+
+
+
+---
+
+
+
+### 4.案例：基于RESTful的页面数据交互
+
+详见：[springmvc\06_REST_case](springmvc\06_REST_case)
+
+<img src="images/image-20251219171823084.png" alt="image-20251219171823084" style="zoom:67%;" />
+
+
+
+---
+
+---
+
+
+
+## 五、SSM整合
+
+
+
+
+
+
 
 
 

@@ -7,6 +7,12 @@
     <file url="file://$PROJECT_DIR$/02_request_mapping/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/03_request_param/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/03_request_param/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/04_response/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/04_response/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/05_REST/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/05_REST/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/06_REST_case/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/06_REST_case/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>
