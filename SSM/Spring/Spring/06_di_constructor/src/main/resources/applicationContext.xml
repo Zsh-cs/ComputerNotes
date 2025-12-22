@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--ref用于引用类型的数据，value用于简单类型的数据-->
+    <bean id="bookDao" class="com.zsh.com.impl.dao.com.zsh.BookDaoImpl">
+        <!--必须按形参顺序书写-->
+        <constructor-arg name="databaseName" value="MySQL"/>
+        <constructor-arg name="connectionNum" value="100"/>
+    </bean>
+
+    <bean id="userDao" class="com.zsh.com.zsh.dao.impl.UserDaoImpl"/>
+
+    <bean id="bookService" class="com.impl.service.com.zsh.BookServiceImpl">
+        <constructor-arg name="bookDao" ref="bookDao"/>
+        <constructor-arg name="userDao" ref="userDao"/>
+    </bean>
+</beans>

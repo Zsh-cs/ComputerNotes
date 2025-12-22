@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--构造器注入的改进写法：解决与形参名称高度耦合的问题-->
+    <bean id="bookDao" class="com.zsh.com.impl.dao.com.zsh.BookDaoImpl">
+<!--        <constructor-arg type="java.lang.String" value="MySQL"/>-->
+<!--        <constructor-arg type="int" value="88"/>-->
+        <constructor-arg index="0" value="MySQL"/>
+        <constructor-arg index="1" value="666"/>
+    </bean>
+
+    <bean id="userDao" class="com.zsh.com.zsh.dao.impl.UserDaoImpl"/>
+
+    <bean id="bookService" class="com.impl.service.com.zsh.BookServiceImpl">
+        <constructor-arg name="bookDao" ref="bookDao"/>
+        <constructor-arg name="userDao" ref="userDao"/>
+    </bean>
+
+</beans>

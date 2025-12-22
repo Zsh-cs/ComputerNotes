@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--1.开辟一个新的命名空间，叫作context-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+">
+
+    <!--2.使用context这个命名空间来加载properties文件-->
+    <!--system-properties-mode="NEVER"表示从不加载系统属性（系统环境变量）-->
+    <context:property-placeholder location="classpath*:*.properties" system-properties-mode="NEVER"/>
+
+    <!--3.使用属性占位符${}读取properties文件中的属性-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" >
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <bean id="bookDao" class="com.impl.dao.com.zsh.BookDaoImpl">
+        <property name="name" value="${username}"/>
+    </bean>
+
+</beans>

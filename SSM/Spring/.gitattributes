@@ -1,0 +1,4 @@
+*.java linguist-language=Java
+*.xml linguist-language=Java
+*.html linguist-language=Java
+*.md linguist-language=Markdown
