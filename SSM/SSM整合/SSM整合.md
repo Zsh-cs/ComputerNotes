@@ -624,7 +624,272 @@ public class BookController {
 
 ## PartⅢ 项目异常处理
 
+### 一、异常处理器
 
+#### 1.异常的常见位置和诱因
+
+|   常见位置   |                           诱因                           |
+| :----------: | :------------------------------------------------------: |
+| 框架内部异常 |                        使用不合规                        |
+|  数据层异常  |             外部服务器故障，如服务器访问超时             |
+|  业务层异常  |   业务逻辑书写错误，如遍历业务书写操作导致索引越界异常   |
+|  表现层异常  |  数据收集、校验等规则错误，如不匹配的数据类型间导致异常  |
+|  工具类异常  | 工具类书写不严谨不够健壮，如长期未释放某个必须释放的连接 |
+
+
+
+#### 2.异常处理思路
+
+各个层级均有可能出现异常，我们将所有异常都抛出到表现层进行统一处理。
+
+表现层处理异常，若每个方法中单独书写，代码臃肿且意义不大，如何解决？——**AOP**思想。
+
+
+
+#### 3.异常处理器
+
+```java
+package com.zsh.controller;
+
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+/**
+ * 项目异常统一处理
+ */
+@RestControllerAdvice// REST风格
+public class ProjectExceptionAdvice {
+
+    @ExceptionHandler(Exception.class)// 拦截所有异常并处理
+    public Result handleException(Exception e) {
+        System.out.println("catch an exception...");
+        return new Result(666, null, "catch an exception");
+    }
+}
+```
+
+
+
+---
+
+
+
+### 二、项目异常处理方案
+
+#### 1.项目异常分类
+
++ **业务异常(BusinessException)**：
+  + 规范的用户行为操作产生的异常，如用户在年龄输入框输入了“十八”而非“18”。。
+  + 不规范的用户行为操作产生的异常，如用户在地址栏输入了`http://localhost/users/heihei`而非`http://localhost/books/1`。
++ **系统异常(SystemException)**：项目运行过程中可预计且无法避免的异常，如服务器宕机。
++ **其他异常(Exception)**：编程人员未预料到的异常，如找不到指定路径的文件。
+
+
+
+#### 2.处理方案
+
++ **业务异常**：发送**对应**消息给用户，提醒用户进行规范操作。
++ **系统异常**：
+  + 发送**固定**消息给用户，安抚用户。
+  + 发送**特定**消息给运维人员，提醒他们维护。
+  + 记录日志。
++ **其他异常**：
+  + 发送**固定**消息给用户，安抚用户。
+  + 发送**特定**消息给开发人员，提醒他们将此异常纳入预期范围内。
+  + 记录日志。
+
+
+
+#### 3.代码实现
+
+##### 3.1 定义`BusinessException`和`SystemException`
+
++ `BusinessException`:
+
+  ```java
+  package com.zsh.exception;
+  
+  public class BuisnessException extends RuntimeException {
+      private Integer code;
+  
+      public BuisnessException(Integer code, String message) {
+          super(message);
+          this.code = code;
+      }
+  
+      public BuisnessException(Integer code, String message, Throwable cause) {
+          super(message, cause);
+          this.code = code;
+      }
+  
+      public Integer getCode() {
+          return code;
+      }
+  
+      public void setCode(Integer code) {
+          this.code = code;
+      }
+  }
+  ```
+
++ `SystemException`:
+
+  ```java
+  package com.zsh.exception;
+  
+  public class SystemException extends RuntimeException {
+      private Integer code;
+  
+      public SystemException(Integer code, String message) {
+          super(message);
+          this.code = code;
+      }
+  
+      public SystemException(Integer code, String message, Throwable cause) {
+          super(message, cause);
+          this.code = code;
+      }
+  
+      public Integer getCode() {
+          return code;
+      }
+  
+      public void setCode(Integer code) {
+          this.code = code;
+      }
+  }
+  ```
+
+
+
+##### 3.2 更新`Code`类
+
+```java
+package com.zsh.controller;
+
+public class Code {
+    // 结尾1代表成功，0代表失败
+
+    public static final Integer SAVE_OK = 20011;
+    public static final Integer DELETE_OK = 20021;
+    public static final Integer UPDATE_OK = 20031;
+    public static final Integer GET_OK = 20041;
+
+    public static final Integer SAVE_ERR = 20010;
+    public static final Integer DELETE_ERR = 20020;
+    public static final Integer UPDATE_ERR = 20030;
+    public static final Integer GET_ERR = 20040;
+
+    public static final Integer SYSTEM_ERR = 50001;
+    public static final Integer SYSTEM_TIMEOUT_ERR = 50002;
+    public static final Integer BUSINESS_ERR = 60001;
+    public static final Integer UNKNOWN_ERR = 99999;
+}
+```
+
+
+
+##### 3.3 在`BookServiceImpl`中触发自定义异常
+
+```java
+package com.zsh.service.impl;
+
+import com.zsh.controller.Code;
+import com.zsh.dao.BookDao;
+import com.zsh.domain.Book;
+import com.zsh.exception.BuisnessException;
+import com.zsh.exception.SystemException;
+import com.zsh.service.BookService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class BookServiceImpl implements BookService {
+
+    @Autowired
+    private BookDao bookDao;
+
+    @Override
+    public boolean save(Book book) {
+        bookDao.save(book);
+        return true;
+    }
+
+    @Override
+    public boolean delete(Integer id) {
+        bookDao.delete(id);
+        return true;
+    }
+
+    @Override
+    public boolean update(Book book) {
+        bookDao.update(book);
+        return true;
+    }
+
+    @Override
+    public Book getById(Integer id) {
+        if (id < 1) {
+            throw new BuisnessException(Code.BUSINESS_ERR, "您输入的id不合法，请重新输入！");
+        }
+
+        try {
+            int i = 1 / 0;// 模拟异常
+        } catch (Exception e) {
+            throw new SystemException(Code.SYSTEM_TIMEOUT_ERR, "服务器访问超时，请重试！", e);
+        }
+        return bookDao.getById(id);
+    }
+
+    @Override
+    public List<Book> getAll() {
+        return bookDao.getAll();
+    }
+}
+```
+
+
+
+##### 3.4 重构`ProjectExceptionAdvice`
+
+```java
+package com.zsh.controller;
+
+import com.zsh.exception.BuisnessException;
+import com.zsh.exception.SystemException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+/**
+ * 项目异常统一处理
+ */
+@RestControllerAdvice// REST风格
+public class ProjectExceptionAdvice {
+
+    @ExceptionHandler(SystemException.class)// 拦截系统异常并处理
+    public Result handleSystemException(SystemException e) {
+        // 1.记录日志
+        // 2.发送消息给运维人员
+        // 3.发送邮件给开发人员
+        return new Result(e.getCode(), null, e.getMessage());
+    }
+
+    @ExceptionHandler(BuisnessException.class)// 拦截业务异常并处理
+    public Result handleBusinessException(BuisnessException e) {
+        return new Result(e.getCode(), null, e.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)// 拦截其他异常并处理
+    public Result handleException(Exception e) {
+        // 1.记录日志
+        // 2.发送消息给运维人员
+        // 3.发送邮件给开发人员
+        return new Result(Code.UNKNOWN_ERR, null, "系统繁忙，请稍后再试！");
+    }
+}
+```
 
 
 

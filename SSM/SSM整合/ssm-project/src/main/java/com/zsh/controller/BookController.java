@@ -34,6 +34,9 @@ public class BookController {
 
     @GetMapping("/{id}")
     public Result getById(@PathVariable Integer id) {
+
+//        int i=1/0;// 模拟异常
+
         Book book = bookService.getById(id);
         Integer code = book != null ? Code.GET_OK : Code.GET_ERR;
         String msg = book != null ? "数据查询成功" : "数据查询失败，请重试";
