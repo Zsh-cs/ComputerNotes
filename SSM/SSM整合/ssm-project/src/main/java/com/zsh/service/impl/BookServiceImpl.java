@@ -19,20 +19,17 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public boolean save(Book book) {
-        bookDao.save(book);
-        return true;
+        return bookDao.save(book) > 0 ? true : false;
     }
 
     @Override
     public boolean delete(Integer id) {
-        bookDao.delete(id);
-        return true;
+        return bookDao.delete(id) > 0 ? true : false;
     }
 
     @Override
     public boolean update(Book book) {
-        bookDao.update(book);
-        return true;
+        return bookDao.update(book) > 0 ? true : false;
     }
 
     @Override
@@ -41,11 +38,11 @@ public class BookServiceImpl implements BookService {
             throw new BuisnessException(Code.BUSINESS_ERR, "您输入的id不合法，请重新输入！");
         }
 
-        try {
-            int i = 1 / 0;// 模拟异常
-        } catch (Exception e) {
-            throw new SystemException(Code.SYSTEM_TIMEOUT_ERR, "服务器访问超时，请重试！", e);
-        }
+//        try {
+//            int i = 1 / 0;// 模拟异常
+//        } catch (Exception e) {
+//            throw new SystemException(Code.SYSTEM_TIMEOUT_ERR, "服务器访问超时，请重试！", e);
+//        }
         return bookDao.getById(id);
     }
 

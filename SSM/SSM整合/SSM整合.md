@@ -317,13 +317,13 @@ import java.util.List;
 public interface BookDao {
 
     @Insert("insert into books (type, name, description) value (#{type},#{name},#{description})")
-    void save(Book book);
+    int save(Book book);
 
     @Delete("delete from books where id=#{id}")
-    void delete(Integer id);
+    int delete(Integer id);
 
     @Update("update books set type=#{type},name=#{name},description=#{description} where id=#{id}")
-    void update(Book book);
+    int update(Book book);
 
     @Select("select * from books where id=#{id}")
     Book getById(Integer id);
@@ -331,6 +331,7 @@ public interface BookDao {
     @Select("select * from books")
     List<Book> getAll();
 }
+
 ```
 
 
@@ -362,8 +363,11 @@ public interface BookDao {
   ```java
   package com.zsh.service.impl;
   
+  import com.zsh.controller.Code;
   import com.zsh.dao.BookDao;
   import com.zsh.domain.Book;
+  import com.zsh.exception.BuisnessException;
+  import com.zsh.exception.SystemException;
   import com.zsh.service.BookService;
   import org.springframework.beans.factory.annotation.Autowired;
   import org.springframework.stereotype.Service;
@@ -378,20 +382,17 @@ public interface BookDao {
   
       @Override
       public boolean save(Book book) {
-          bookDao.save(book);
-          return true;
+          return bookDao.save(book) > 0 ? true : false;
       }
   
       @Override
       public boolean delete(Integer id) {
-          bookDao.delete(id);
-          return true;
+          return bookDao.delete(id) > 0 ? true : false;
       }
   
       @Override
       public boolean update(Book book) {
-          bookDao.update(book);
-          return true;
+          return bookDao.update(book) > 0 ? true : false;
       }
   
       @Override
@@ -901,11 +902,56 @@ public class ProjectExceptionAdvice {
 
 ## PartⅣ 前后端协议联调
 
+### 一、更新`config`包下的核心配置类
+
+#### 1.新增`SpringMvcSupport`
+
+```java
+package com.zsh.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+
+@Configuration
+public class SpringMvcSupport extends WebMvcConfigurationSupport {
+
+    @Override
+    // 放行静态资源
+    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/pages/**").addResourceLocations("/pages/");
+        registry.addResourceHandler("/css/**").addResourceLocations("/css/");
+        registry.addResourceHandler("/js/**").addResourceLocations("/js/");
+        registry.addResourceHandler("/plugins/**").addResourceLocations("/plugins/");
+    }
+}
+```
 
 
 
+#### 2.重构`SpringMvcConfig`
+
+```java
+package com.zsh.config;
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+@Configuration
+@ComponentScan({"com.zsh.controller", "com.zsh.config"})
+@EnableWebMvc
+public class SpringMvcConfig {
+}
+```
 
 
 
+---
 
+
+
+### 二、完善功能模块
+
+#### 
 
