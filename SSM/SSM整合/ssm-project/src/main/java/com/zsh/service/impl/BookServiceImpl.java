@@ -34,7 +34,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book getById(Integer id) {
-        if (id < 1) {
+        if (id <= 1) {
             throw new BuisnessException(Code.BUSINESS_ERR, "您输入的id不合法，请重新输入！");
         }
 

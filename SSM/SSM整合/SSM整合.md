@@ -9,7 +9,6 @@
 **项目结构**：
 
 ```bash
-src
 ├─main
 │  ├─java
 │  │  └─com
@@ -20,10 +19,12 @@ src
 │  │          │      ServletConfig.java
 │  │          │      SpringConfig.java
 │  │          │      SpringMvcConfig.java
+│  │          │      SpringMvcSupport.java
 │  │          │
 │  │          ├─controller
 │  │          │      BookController.java
 │  │          │      Code.java
+│  │          │      ProjectExceptionAdvice.java
 │  │          │      Result.java
 │  │          │
 │  │          ├─dao
@@ -31,6 +32,10 @@ src
 │  │          │
 │  │          ├─domain
 │  │          │      Book.java
+│  │          │
+│  │          ├─exception
+│  │          │      BuisnessException.java
+│  │          │      SystemException.java
 │  │          │
 │  │          └─service
 │  │              │  BookService.java
@@ -44,6 +49,39 @@ src
 │  └─webapp
 │      │  index.jsp
 │      │
+│      ├─css
+│      │      style.css
+│      │
+│      ├─js
+│      │      axios-0.18.0.js
+│      │      index.js
+│      │      jquery.min.js
+│      │      vue.js
+│      │
+│      ├─pages
+│      │      books.html
+│      │
+│      ├─plugins
+│      │  ├─elementui
+│      │  │  │  index.css
+│      │  │  │  index.js
+│      │  │  │
+│      │  │  └─fonts
+│      │  │          element-icons.woff
+│      │  │
+│      │  └─font-awesome
+│      │      ├─css
+│      │      │      font-awesome.css
+│      │      │      font-awesome.min.css
+│      │      │
+│      │      └─fonts
+│      │              fontawesome-webfont.eot
+│      │              fontawesome-webfont.svg
+│      │              fontawesome-webfont.ttf
+│      │              fontawesome-webfont.woff
+│      │              fontawesome-webfont.woff2
+│      │              FontAwesome.otf
+│      │
 │      └─WEB-INF
 │              web.xml
 │
@@ -55,9 +93,7 @@ src
                         BookServiceTest.java
 ```
 
-<img src="images/image-20251223003157584.png" alt="image-20251223003157584" style="zoom:80%;" />
-
-<img src="images/image-20251223003213599.png" alt="image-20251223003213599" style="zoom: 80%;" />
+<img src="images/image-20251224162524975.png" alt="image-20251224162524975" style="zoom:80%;" /><img src="images/image-20251224162602619.png" alt="image-20251224162602619" style="zoom:80%;" /><img src="images/image-20251223003213599.png" alt="image-20251223003213599" style="zoom: 80%;" />
 
 
 
@@ -953,5 +989,129 @@ public class SpringMvcConfig {
 
 ### 二、完善功能模块
 
-#### 
+#### 2.1 前后端交互格式
+
+<img src="images/image-20251224162027894.png" alt="image-20251224162027894" style="zoom:67%;" />
+
+
+
+#### 2.2 代码实现
+
+```js
+<script>
+    var vue = new Vue({
+
+        el: '#app',
+        data: {
+            pagination: {},
+            dataList: [],// 当前页要展示的列表数据
+            formData: {},// 表单数据
+            dialogFormVisible: false,// 控制表单是否可见
+            dialogFormVisible4Edit: false,// 编辑表单是否可见
+            rules: {// 校验规则
+                type: [{required: true, message: '图书类别为必填项', trigger: 'blur'}],
+                name: [{required: true, message: '图书名称为必填项', trigger: 'blur'}]
+            }
+        },
+
+        // 钩子函数，VUE对象初始化完成后自动执行
+        created() {
+            this.getAll();
+        },
+
+        methods: {
+            //Todo: 列表
+            getAll() {
+                // 发送ajax请求
+                axios.get("/books").then((res) => {
+                    this.dataList = res.data.data;
+                })
+            },
+
+            //Todo: 弹出添加窗口
+            handleCreate() {
+                this.dialogFormVisible = true;// 显示对话框
+                this.resetForm();// 重置对话框表单
+            },
+
+            //Todo: 重置对话框表单
+            resetForm() {
+                this.formData = {};
+            },
+
+            //Todo: 添加
+            handleAdd() {
+                axios.post("/books", this.formData).then((res) => {
+                    if (res.data.code == 20011) {// 如果添加成功，则关闭对话框并重置表单
+                        this.dialogFormVisible = false;
+                        this.$message.success("添加图书成功")
+                    } else if (res.data.code == 20010) {// 如果添加失败
+                        this.$message.error("添加图书失败！")
+                    } else {// 其他情况
+                        this.$message.error(res.data.msg);
+                    }
+                }).finally(() => {
+                    this.getAll();
+                })
+            },
+
+            //Todo: 弹出编辑窗口
+            handleUpdate(row) {
+                // 根据id查询出对应的图书展示出来，方便用户修改图书
+                axios.get("/books/" + row.id).then((res) => {
+                    if (res.data.code == 20041) {// 查询成功
+                        this.formData = res.data.data;
+                        this.dialogFormVisible4Edit = true;
+                    } else {// 其他情况
+                        this.$message.error(res.data.msg);
+                    }
+                })
+            },
+
+            //Todo: 编辑
+            handleEdit() {
+                axios.put("/books", this.formData).then((res) => {
+                    if (res.data.code == 20031) {// 如果修改成功，则关闭对话框并重置表单
+                        this.dialogFormVisible4Edit = false;
+                        this.$message.success("修改图书成功")
+                    } else if (res.data.code == 20030) {// 如果修改失败
+                        this.$message.error("修改图书失败！")
+                    } else {// 其他情况
+                        this.$message.error(res.data.msg);
+                    }
+                }).finally(() => {
+                    this.getAll();
+                })
+            },
+
+            //Todo: 删除
+            handleDelete(row) {
+                // 弹出“确定要删除吗？”的提示框
+                this.$confirm("您确定要删除此图书吗？", "提示", {
+                    type: "info"
+                }).then(() => {
+                    // 用户点击确定后，执行删除操作
+                    axios.delete("/books/" + row.id).then((res) => {
+                        if (res.data.code == 20021) {// 如果删除成功
+                            this.$message.success("删除图书成功")
+                        } else {// 其他情况
+                            this.$message.error("删除图书失败！");
+                        }
+                    }).finally(() => {
+                        this.getAll();
+                    })
+                }).catch(() => {
+                    // 用户点击取消后，放弃删除操作
+                    this.$message.info("您取消了对该图书的删除操作")
+                });
+            }
+        }
+    })
+
+</script>
+```
+
+
+
+
 
