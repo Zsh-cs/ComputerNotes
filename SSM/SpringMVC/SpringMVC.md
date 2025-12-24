@@ -1023,6 +1023,86 @@ public class SpringMvcConfig implements WebMvcConfigurer {
 
 
 
+---
+
+
+
+### 3.拦截器参数
+
+#### 3.1 前置处理器
+
+```java
+public boolean preHandle(
+    HttpServletRequest request, 
+    HttpServletResponse response, 
+    Object handler) throws Exception 
+{
+    System.out.println("pre handle ...");
+    return true;
+}
+```
+
++ 参数：
+  + `request`：请求对象。
+  + `response`：响应对象。
+  + `handler`：被调用的处理器对象，本质上是一个方法对象，对反射技术中的`Method`对象进行了再包装。
++ 返回值：若`return false`，则会阻止原始方法的执行。
+
+
+
+#### 3.2 后置处理器
+
+```java
+public void postHandle(
+    HttpServletRequest request, 
+    HttpServletResponse response, 
+    Object handler, 
+    ModelAndView modelAndView) throws Exception 
+{
+    System.out.println("post handle ...");
+}
+```
+
++ 参数`modelAndView`：如果处理器执行完成后具有返回结果，则可以读取到对应的数据与页面信息，并进行调整（现代开发已淘汰）。
+
+
+
+#### 3.3 完成后处理器
+
+```java
+public void afterCompletion(
+    HttpServletRequest request, 
+    HttpServletResponse response, 
+    Object handler, 
+    Exception ex) throws Exception 
+{
+    System.out.println("after completion ...");
+}
+```
+
++ 参数`ex`：如果处理器执行过程中出现异常对象，可以针对异常情况进行单独处理（现代开发已淘汰）。
+
+
+
+---
+
+
+
+### 4.拦截器链的执行顺序
+
+> [!TIP]
+>
+> 当配置多个拦截器时，会形成拦截器链。
+
++ 参照代码中拦截器的添加顺序，先进后出，后进先出（类似于“栈”）。
++ 当某个拦截器中的`preHandler()`方法返回了`true`，则**后面**拦截器均被终止运行，仅运行**前面**拦截器（不包括当前拦截器）的`afterCompletion()`方法。
+
+<img src="images/image-20251224223024675.png" alt="image-20251224223024675" style="zoom:67%;" />
+
+
+
+
+
 
 
 
