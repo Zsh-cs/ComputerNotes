@@ -6,19 +6,31 @@
 
 ### 一、简介
 
-<img src="assets\1658881455780.png" alt="1658881455780" style="zoom:60%;" />
+<img src="images\1658881455780.png" alt="1658881455780" style="zoom:60%;" />
 
 
 
+---
+
+---
 
 
-### 二、MyBatis入门案例：查询所有用户信息-`selectAll`
 
-**0.项目整体结构**
+### 二、入门案例：查询所有用户信息
+
+#### 0.项目整体结构
 
 <img src="C:\Users\asus\AppData\Roaming\Typora\typora-user-images\image-20241018122536188.png" alt="image-20241018122536188" style="zoom:80%;" />
 
-1.导入`mybatis.sql`文件，初始化`mybatis`数据库
+
+
+---
+
+
+
+#### 1.初始化数据库
+
+导入`mybatis.sql`文件，初始化`mybatis`数据库：
 
 ```sql
 CREATE DATABASE IF NOT EXISTS `mybatis` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin 
@@ -107,9 +119,17 @@ CREATE TABLE `user_role` (
 insert  into `user_role`(`uid`,`rid`) values (41,1),(45,1),(41,2);
 ```
 
-2.创建空工程`MyBatisProject`,创建模块`mybatis`，在`pom.xml`中导入各种需要的依赖坐标，在项目的 `resources` 目录下复制`logback.xml`这一配置文件
 
-+ `pom.xml`
+
+---
+
+
+
+#### 2.初始化工程
+
+创建空工程`MyBatisProject`，创建模块`mybatis`，在`pom.xml`中导入各种需要的依赖坐标，在项目的 `resources` 目录下复制`logback.xml`这一配置文件：
+
+##### 2.1 `pom.xml`
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -172,7 +192,7 @@ insert  into `user_role`(`uid`,`rid`) values (41,1),(45,1),(41,2);
 
 
 
-+ `logback.xml`
+##### 2.2`logback.xml`
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -206,7 +226,7 @@ insert  into `user_role`(`uid`,`rid`) values (41,1),(45,1),(41,2);
 
 
 
-3.创建实体层`com.zsh.domain`，创建实体类`User`，参考数据库字段编写代码
+#### 3.创建实体层`com.zsh.domain`并创建实体类`User`，参考数据库字段编写代码
 
 ```java
 package com.zsh.domain;
@@ -224,7 +244,7 @@ public class User {
 
 
 
-4.创建数据库映射层`com.zsh.mapper`,创建接口`UserMapper`,编写`selectAll`方法
+#### 4.创建数据库映射层`com.zsh.mapper`并创建接口`UserMapper`，编写`selectAll`方法
 
 ```java
 package com.zsh.mapper;
@@ -239,7 +259,7 @@ public interface UserMapper {
 
 
 
-5.在模块的 `resources-com.zsh.mapper` 目录下创建映射配置文件 `UserMapper.xml`
+#### 5.在模块的`resources-com.zsh.mapper`目录下创建映射配置文件`UserMapper.xml`
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -255,7 +275,9 @@ public interface UserMapper {
 
 
 
-6.在模块的 `resources` 目录下创建`mybatis`的配置文件 `mybatis-config.xml`，从而建立与数据库之间的连接（**注册驱动**）
+#### 6.注册数据库驱动
+
+在模块的`resources`目录下创建`mybatis`的配置文件`mybatis-config.xml`，从而建立与数据库之间的连接（**注册驱动**）：
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -282,7 +304,7 @@ public interface UserMapper {
 
 
 
-7.在模块的 `test-java`目录下创建`com.zsh.test`层，创建`UserTest`类，编码
+#### 7.在模块的`test-java`目录下创建`com.zsh.test`层并创建`UserTest`类
 
 ```java
 package com.zsh.test;
@@ -323,9 +345,11 @@ public class UserTest {
 
 ------
 
+---
 
 
-### 三、根据Id查询用户信息-`selectById`
+
+### 三、根据ID查询用户信息
 
 1.重构`UserMapper`接口，加入`selectById`方法。
 
@@ -428,15 +452,15 @@ public class UserTest {
 
 ------
 
+---
+
 
 
 ### 四、核心配置文件
 
-<img src="assets\1658881364638.png" alt="1658881364638" style="zoom:60%;" />
+<img src="images\1658881364638.png" alt="1658881364638" style="zoom:60%;" />
 
-
-
-###### 1-properties（属性）
+#### 1.properties（属性）
 
 + 创建`jdbcConfig.properties`文件
 
@@ -475,9 +499,15 @@ jdbc.password=123456
 
 
 
-###### 2-typeAliases（类型别名）
+---
 
-注意节点的位置顺序不能写错（[properties（属性）](https://mybatis.org/mybatis-3/zh/configuration.html#properties) ->[settings（设置）](https://mybatis.org/mybatis-3/zh/configuration.html#settings) ->[typeAliases（类型别名）](https://mybatis.org/mybatis-3/zh/configuration.html#typeAliases) ）
+
+
+#### 2.typeAliases（类型别名）
+
+> [!CAUTION]
+>
+> 注意节点的位置顺序不能写错：properties->settings->typeAliases。
 
 方式一：配置在主配置文件`configuration`节点之下
 
@@ -501,11 +531,15 @@ jdbc.password=123456
 
 
 
-###### 3-environments（环境配置）
+---
 
-在核心配置文件的 `environments` 标签中其实是可以配置多个 `environment` ，使用 `id` 给每段环境起名，在 `environments` 中使用 `default='环境id'` 来指定使用哪个环境的配置。我们一般就配置一个 `environment` 即可
 
-参考代码
+
+#### 3.environments（环境配置）
+
+在核心配置文件的`environments`标签中其实是可以配置多个 `environment`，使用`id`给每段环境起名，在`environments`中使用 `default='环境id'`来指定使用哪个环境的配置。我们一般就配置一个`environment`即可。
+
+参考代码：
 
 ```xml
 	<!--配置环境-->
@@ -536,11 +570,15 @@ jdbc.password=123456
 
 
 
-###### 4-mappers（映射器）
+---
+
+
+
+#### 4.mappers（映射器）
 
 配置`<package>`，那么就会自动包含`mapper`包下的所有`xml`，无需再一一配置映射器。
 
-参考代码
+参考代码：
 
 ```xml
 <!--配置映射器-->
@@ -556,19 +594,21 @@ jdbc.password=123456
 
 ------
 
+---
+
 
 
 ### 五、开发利器
 
-###### 1.MyBatisX
+#### 1.MyBatisX
 
-<img src="assets\1658908524068.png" alt="1658908524068" style="zoom:60%;" />
+<img src="images\1658908524068.png" alt="1658908524068" style="zoom:60%;" />
 
 
 
-###### 2.lombok
+#### 2.lombok
 
-加入依赖坐标
+加入依赖坐标：
 
 ```xml
         <dependency>
@@ -578,7 +618,7 @@ jdbc.password=123456
         </dependency>
 ```
 
-实例类
+实例类：
 
 ```java
 package com.itbbj.domain;
@@ -603,29 +643,27 @@ public class User {
 
 ---
 
----
-
----
-
----
-
 
 
 ## 六、CRUD操作
 
-### A.查询
+### 1.查询
 
-#### A-1 `ResultMap`应用
+#### 1.1 `ResultMap`应用
 
-###### A-1-1 案例需求：查询brand表中所有数据
+##### 1.1.1 案例需求：查询brand表中所有数据
 
-![1659052635256](assets\1659052635256.png)
+![1659052635256](images\1659052635256.png)
+
+
 
 ---
 
-###### A-1-2 实现步骤：
 
-Step1.在实体层`com.zsh.domain`中创建实体类`Brand`,参考数据库中`brand`表的相应字段编码。
+
+##### 1.1.2 实现步骤
+
+步骤1：在实体层`com.zsh.domain`中创建实体类`Brand`，参考数据库中`brand`表的相应字段编码。
 
 **注意事项：留意属性名称和数据库字段是否一致**
 
@@ -640,11 +678,11 @@ public class Brand {
     private Integer ordered;
     private String description;
     //1-启用状态 0-禁用状态
-    private Integer status;
+    private Integer s:tatus;
 }
 ```
 
-Step2.在数据库映射层`com.zsh.mapper`中创建接口`BrandMapper`,编码。
+步骤2：在数据库映射层`com.zsh.mapper`中创建接口`BrandMapper`,编码。
 
 ```java
 package com.zsh.mapper;
@@ -657,7 +695,7 @@ public interface BrandMapper {
 }
 ```
 
-Step3.在`resources`目录下创建映射配置文件 `BrandMapper.xml`
+步骤3：在`resources`目录下创建映射配置文件 `BrandMapper.xml`
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -671,7 +709,7 @@ Step3.在`resources`目录下创建映射配置文件 `BrandMapper.xml`
 </mapper>
 ```
 
-Step4.在`test-java-com.zsh.test`目录下创建`BrandTest`类，编码 `testSeleteAll()`。
+步骤4：在`test-java-com.zsh.test`目录下创建`BrandTest`类，编码 `testSeleteAll()`。
 
 ```java
 package com.zsh.test;
@@ -721,7 +759,7 @@ public class BrandTest {
         //使用代理对象执行方法
         List<Brand> brands=brandMapper.selectAll();
         for (Brand brand : brands) {
-            System.out.println(brand);
+         :   System.out.println(brand);
         }
     }
 }
@@ -731,9 +769,13 @@ public class BrandTest {
 
 <img src="C:\Users\asus\AppData\Roaming\Typora\typora-user-images\image-20241017001105890.png" alt="image-20241017001105890" style="zoom:80%;" />
 
+
+
 ---
 
-###### A-1-3 对于`brand_name、company_name`显示为`null`的解决方案：
+
+
+##### 1.1.3 对于`brand_name、company_name`显示为`null`的解决方案
 
 重构`BrandMapper.xml`
 
@@ -784,21 +826,23 @@ public class BrandTest {
 
 ---
 
+
+
+#### 1.2 模糊查询
+
+#####  1.2.1 案例需求：根据公司名称进行全匹配模糊查询，查询公司名称中包含”科技有限”的数据信息
+
+![1659052915886](images\1659052915886.png)
+
+
+
 ---
 
 
 
-#### A-2 模糊查询
+##### 1.2.2 实现方式
 
-######  A-2-1 案例需求：根据公司名称进行全匹配模糊查询，查询公司名称中包含”科技有限”的数据信息
-
-![1659052915886](assets\1659052915886.png)
-
----
-
-###### A-2-2 实现方式
-
-方式一（不推荐）：`brandMapper.selectByCompanyName("%科技有限%")`
+###### 方式一（不推荐）：`brandMapper.selectByCompanyName("%科技有限%")`
 
 步骤1：在`BrandMapper`层创建`selectByCompanyName`方法
 
@@ -855,7 +899,11 @@ public interface BrandMapper {
 
 
 
-方式二（不推荐）：`like '%${companyName}%'`
+---
+
+
+
+###### 方式二（不推荐）：`like '%${companyName}%'`
 
 步骤1：在`BrandMapper`层创建`selectByCompanyName`方法：同方式一步骤1
 
@@ -900,7 +948,11 @@ public interface BrandMapper {
 
 
 
-方式三（推荐）：`concat('%',#{companyName},'%')`
+----
+
+
+
+###### 方式三（推荐）：`concat('%',#{companyName},'%')`
 
 步骤1：在`BrandMapper`层创建`selectByCompanyName`方法：同方式一步骤1
 
@@ -937,7 +989,9 @@ public interface BrandMapper {
 
 ---
 
-###### A-2-3 总结
+
+
+##### 1.2.3 总结
 
 ```
 方式一：封装数据时耦合业务需求（不推荐）
@@ -951,21 +1005,23 @@ brandMapper.selectByCompanyName("%科技有限%");
 
 ---
 
+
+
+#### 1.3 多参数查询
+
+##### 1.3.1 案例需求：根据公司名称及品牌状态进行全匹配模糊查询，查询公司名称中包含”科技有限”及状态为‘0’的数据信息
+
+![1659052995694](images\1659052995694.png)
+
+
+
 ---
 
 
 
-#### A-3 多参数查询
+##### 1.3.2 实现方法
 
-###### A-3-1 案例需求：根据公司名称及品牌状态进行全匹配模糊查询，查询公司名称中包含”科技有限”及状态为‘0’的数据信息
-
-![1659052995694](assets\1659052995694.png)
-
----
-
-###### A-3-2 实现方法
-
-方法一：使用`@param`注解
+###### 方法一：使用`@param`注解
 
 步骤1：在BrandMapper层创建selectByCompanyNameAndStatus方法
 
@@ -1027,7 +1083,11 @@ public interface BrandMapper {
 
 
 
-方法二：通过封装实体对象数据进行传参
+---
+
+
+
+###### 方法二：通过封装实体对象数据进行传参
 
 步骤1：在BrandMapper层创建selectByBrand方法
 
@@ -1093,7 +1153,11 @@ public interface BrandMapper {
 
 
 
-方法三：通过封装`Map`对象数据进行传参
+---
+
+
+
+###### 方法三：通过封装`Map`对象数据进行传参
 
 步骤1：在BrandMapper接口层创建selectByCondition方法
 
@@ -1163,7 +1227,9 @@ public interface BrandMapper {
 
 ---
 
-###### A-3-3 总结：
+
+
+##### 1.3.3 总结
 
 ```
 方式1-直接通过参数-缺点：参数一变，就要修改接口方法
@@ -1178,19 +1244,17 @@ selectByCondition(Map map)
 
 ---
 
----
+
+
+#### 1.4 动态查询-where-if
+
+##### P1 案例需求
+
+<img src="images\1658994920095.png" alt="1658994920095" style="zoom: 67%;" />
 
 
 
-#### A-4 动态查询-where-if
-
-###### A-4-1 案例需求
-
-<img src="assets\1658994920095.png" alt="1658994920095" style="zoom: 67%;" />
-
----
-
-###### A-4-2 案例代码
+##### P2 案例代码
 
 步骤1：重构映射文件xml-`<select id="selectByCondition">...<select>`
 
@@ -1230,9 +1294,7 @@ selectByCondition(Map map)
 
 
 
----
-
-###### A-4-3 总结
+##### P3 总结
 
 ```
 if 标签：条件判断
@@ -1249,19 +1311,17 @@ where 标签
 
 ---
 
----
+
+
+#### 1.5 动态查询-choose-when
+
+##### P1 案例需求
+
+<img src="images\1658996155622.png" alt="1658996155622" style="zoom: 67%;" />
 
 
 
-#### A-5 动态查询-choose-when
-
-###### A-5-1 案例需求
-
-<img src="assets\1658996155622.png" alt="1658996155622" style="zoom: 67%;" />
-
----
-
-###### A-5-2 案例代码
+##### P2 案例代码
 
 步骤1：重构映射文件xml-`<select id="selectByCondition">...<select>`
 
@@ -1307,33 +1367,25 @@ where 标签
 
 ---
 
----
 
 
+#### 1.6 SQL语句特殊符号处理
 
-#### A-6 SQL语句特殊符号处理
+##### P1 案例需求：查询id<45的用户信息
 
-###### A-6-1 案例需求：查询id<45的用户信息
+##### P2 总结
 
----
-
-###### A-6-2 总结
-
-<img src="assets\1658997583217.png" alt="1658997583217"  />
+<img src="images\1658997583217.png" alt="1658997583217" style="zoom: 80%;" />
 
 
 
 ---
 
----
-
----
 
 
+### 2.新增
 
-### B.新增
-
-#### B-1 单行新增
+#### 2.1 单行新增
 
 步骤1-在`BrandMapper`层创建insert方法
 
@@ -1386,11 +1438,9 @@ public interface BrandMapper {
 
 ---
 
----
 
 
-
-#### B-2 批量新增
+#### 2.2 批量新增
 
 步骤1-在`BrandMapper`层创建i`nsertBatch`方法
 
@@ -1452,19 +1502,13 @@ public interface BrandMapper {
 
 ------
 
----
-
----
 
 
+### 3.修改
 
-### C.修改
+#### 3.1 案例需求：根据品牌Id，修改品牌信息
 
-###### C-1 案例需求：根据品牌Id，修改品牌信息
-
----
-
-###### C-2 实现步骤
+#### 3.2 实现步骤
 
 步骤1-在`BrandMapper`层创建`updateById`方法
 
@@ -1528,15 +1572,11 @@ public interface BrandMapper {
 
 ------
 
----
-
-----
 
 
+### 4.删除
 
-### D.删除
-
-#### D-1 单行删除
+#### 4.1 单行删除
 
 步骤1-在`BrandMapper`层创建`deleteById`方法
 
@@ -1573,13 +1613,7 @@ public interface BrandMapper {
 
 
 
----
-
----
-
-
-
-#### D-2 批量删除
+#### 4.2 批量删除
 
 步骤1-在`BrandMapper`层创建`deleteByIds`方法
 
@@ -1644,19 +1678,13 @@ public interface BrandMapper {
 
 ---
 
----
-
----
 
 
+### 5.注解实现CRUD（适合简单逻辑）
 
-### E.注解实现CRUD（适合简单逻辑）
+#### 5.1 需求-实现角色role表的增删改查
 
-###### E-1 需求-实现角色role表的增删改查
-
----
-
-###### E-2 实现步骤
+#### 5.2 实现步骤
 
 步骤1-新增实体类`Role`
 
