@@ -911,13 +911,115 @@ public class BookController {
 
 
 
-## 五、SSM整合
+## 五、拦截器
+
+### 1.概述
+
+<img src="images/image-20251224165125861.png" alt="image-20251224165125861" style="zoom: 67%;" />
+
++ **拦截器(Interceptor)**是一种动态拦截方法调用的机制，在SpringMVC中动态拦截控制器方法的执行。
++ **作用**：
+  + 在指定的方法调用前后执行预先设定的代码。
+  + 根据需要阻止原始方法的执行。
++ 拦截器与过滤器(Filter)的区别：
+  + 归属不同：过滤器属于Servlet技术，拦截器属于SpringMVC技术。
+  + 拦截内容不同：过滤器对所有访问进行增强，拦截器只针对SpringMVC的访问进行增强。
 
 
 
+---
 
 
 
+### 2.入门案例
+
+#### 2.1 创建拦截器类`ProjectInterceptor`，并实现`HandlerInterceptor`接口
+
+```java
+@Component
+public class ProjectInterceptor implements HandlerInterceptor {
+    @Override
+    // 拦截之前
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("pre handle ...");
+        return true;// 若return false，则会阻止原始方法的执行
+    }
+
+    @Override
+    // 拦截之后
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("post handle ...");
+    }
+
+    @Override
+    // 完成后
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("after completion ...");
+    }
+}
+```
+
+
+
+#### 2.2 创建配置类`SpringMvcSupport`，继承`WebMvcCofigurationSupport`，并实现`addInterceptors()`方法
+
+```java
+@Configuration
+public class SpringMvcSupport extends WebMvcConfigurationSupport {
+
+    @Autowired
+    private ProjectInterceptor interceptor;
+
+    @Override
+    protected void addInterceptors(InterceptorRegistry registry) {
+        // 访问/books及其子目录，都需要经过拦截器
+        registry.addInterceptor(interceptor).addPathPatterns("/books", "/books/*");
+    }
+}
+```
+
+
+
+#### 2.3 在`SpringMvcConfig`中扫描`com.zsh.config`这个包使拦截器生效
+
+```java
+@Configuration
+@ComponentScan({"com.zsh.controller", "com.zsh.config"})
+@EnableWebMvc
+public class SpringMvcConfig {
+}
+```
+
+
+
+#### 2.4 使用标准接口`WebMvcConfigurer`简化2.2+2.3
+
+> [!Caution]
+>
+> 此方法侵入式较强，与Spring紧耦合。
+
+```java
+@Configuration
+//@ComponentScan({"com.zsh.controller", "com.zsh.config"})
+@ComponentScan({"com.zsh.controller"})
+@EnableWebMvc
+public class SpringMvcConfig implements WebMvcConfigurer {
+    @Autowired
+    private ProjectInterceptor interceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 访问/books及其子目录，都需要经过拦截器
+        registry.addInterceptor(interceptor).addPathPatterns("/books", "/books/*");
+    }
+}
+```
+
+
+
+#### 2.5 拦截器执行流程
+
+<img src="images/image-20251224174305903.png" alt="image-20251224174305903" style="zoom:67%;" />
 
 
 

@@ -15,6 +15,7 @@
         <module>04_response</module>
         <module>05_REST</module>
         <module>06_REST_case</module>
+        <module>07_interceptor</module>
     </modules>
 
     <dependencies>
