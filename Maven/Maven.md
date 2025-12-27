@@ -356,9 +356,94 @@ jdbc.password=123456
 
 ### 5.1 多环境开发
 
+<img src="images/image-20251227225851395.png" alt="image-20251227225851395" style="zoom:67%;" />
+
+#### P1 定义多环境
+
+```xml
+<!--配置多环境-->
+<profiles>
+    <!--开发环境-->
+    <profile>
+        <id>env_development</id>
+        <!--定义属性-->
+        <properties>
+            <spring.version>5.2.10.RELEASE</spring.version>
+            <jdbc.url>jdbc:mysql://127.1.1.1:3306/ssm_db</jdbc.url>
+        </properties>
+        <activation>
+            <!--设置为默认环境-->
+            <activeByDefault>true</activeByDefault>
+        </activation>
+    </profile>
+
+    <!--生产环境-->
+    <profile>
+        <id>env_produce</id>
+        <properties>
+            <spring.version>5.2.10.RELEASE</spring.version>
+            <jdbc.url>jdbc:mysql://127.2.2.2:3306/ssm_db</jdbc.url>
+        </properties>
+    </profile>
+
+    <!--测试环境-->
+    <profile>
+        <id>env_test</id>
+        <properties>
+            <spring.version>5.2.10.RELEASE</spring.version>
+            <junit.version>4.12</junit.version>
+            <jdbc.url>jdbc:mysql://127.3.3.3:3306/ssm_db</jdbc.url>
+        </properties>
+    </profile>
+</profiles>
+```
+
+#### P2 使用多环境
+
++ **格式**：`mvn 指令 -P 环境id`
+
++ **示例**：`mvn install -P env_produce`
+
 
 
 ### 5.2 跳过测试
+
+#### P1 应用场景
+
++ 功能正在更新中，还没有开发完毕。
++ 快速打包。
+
+#### P2 跳过测试的方式
+
+方式一：
+
+![image-20251227233536049](images/image-20251227233536049.png)
+
+方式二：
+
+```xml
+<build>
+    <plugins>
+        <!--跳过测试-->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.2.5</version>
+            <configuration>
+                <skipTests>false</skipTests>
+                <!--排除掉不参与测试的内容-->
+                <excludes>
+                    <exclude>**/BookServiceTest.java</exclude>
+                </excludes>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+方式三：
+
+`mvn 指令 -D skipTests`
 
 
 
@@ -368,11 +453,104 @@ jdbc.password=123456
 
 ## 6.私服
 
+### 6.1 概述
+
+![image-20251227234621483](images/image-20251227234621483.png)
+
++ 私服是一台独立的服务器，用于解决团队内部的maven资源共享与同步问题。
++ Nexus是Sonatype公司的一款maven私服产品，默认端口是8081。
 
 
 
+### 6.2 私服资源操作流程
+
+![image-20251228002609980](images/image-20251228002609980.png)
 
 
+
+### 6.3 私服仓库分类
+
+| 仓库类型 | 英文名称 |                      功能                      | 关联操作 |
+| :------: | :------: | :--------------------------------------------: | :------: |
+| 宿主仓库 |  hosted  | 保存自主开发的资源和中央仓库都没有的第三方资源 |   上传   |
+| 代理仓库 |  proxy   |                代理连接中央仓库                |   下载   |
+|  仓库组  |  group   |            为仓库编组，简化下载操作            |   下载   |
+
+
+
+### 6.4 本地仓库与私服仓库的交互
+
+![image-20251228003324441](images/image-20251228003324441.png)
+
+#### 6.4.1 本地仓库访问私服仓库的相关配置
+
+在私服中新建2个宿主仓库：`zsh-snapshot`和`zsh-release`，然后打开maven安装目录下的`conf/settings.xml`新增如下配置：
+
+```xml
+  <!-- servers
+   | This is a list of authentication profiles, keyed by the server-id used within the system.
+   | Authentication profiles can be used whenever maven must make a connection to a remote server.
+   |-->
+  <servers>
+    <!-- 配置本地仓库访问私服仓库的权限 -->
+    <server>
+      <id>zsh-snapshot</id>
+      <username>admin</username>
+      <password>0208</password>
+    </server>
+    <server>
+      <id>zsh-release</id>
+      <username>admin</username>
+      <password>0208</password>
+    </server>
+  </servers>
+
+  <!-- mirrors
+   | This is a list of mirrors to be used in downloading artifacts from remote repositories.
+   |
+   | It works like this: a POM may declare a repository to use in resolving certain artifacts.
+   | However, this repository may have problems with heavy traffic at times, so people have mirrored
+   | it to several places.
+   |
+   | That repository definition will have a unique id, so we can create a mirror reference for that
+   | repository, to be used as an alternate download site. The mirror site will be the preferred
+   | server for that repository.
+   |-->
+  <mirrors>
+    <!-- 配置私服仓库的访问路径 -->
+    <mirror>
+      <id>maven-public</id>
+      <mirrorOf>*</mirrorOf>
+      <url>http://localhost:8081/repository/maven-public/</url>
+    </mirror>
+  </mirrors>
+```
+
+
+
+#### 6.4.2 配置当前项目保存在私服仓库的具体位置（`pom.xml`）
+
+```xml
+<!--配置当前项目保存在私服仓库中的具体位置-->
+<distributionManagement>
+    <repository>
+        <id>zsh-release</id>
+        <url>http://localhost:8081/repository/zsh-release/</url>
+    </repository>
+    <snapshotRepository>
+        <id>zsh-snapshot</id>
+        <url>http://localhost:8081/repository/zsh-snapshot/</url>
+    </snapshotRepository>
+</distributionManagement>
+```
+
+
+
+#### 6.4.3 资源上传与下载
+
+通过命令`mvn deploy`。
+
+<img src="images/image-20251228010136659.png" alt="image-20251228010136659" style="zoom:80%;" />
 
 
 
