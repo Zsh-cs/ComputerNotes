@@ -191,7 +191,7 @@
 </dependencies>
 ```
 
-##### P3 在父工程的`pom.xml`中配置子工程可选的依赖关系
+##### P3 在父工程的`pom.xml`中配置子工程可选的依赖关系（与`<dependencies>`标签同级）
 
 ```xml
 <!--定义依赖管理-->
@@ -257,7 +257,94 @@
 
 ## 4.属性管理
 
+### 4.1 属性配置与使用
 
+<img src="images/image-20251227154342144.png" alt="image-20251227154342144" style="zoom:80%;" />
+
+#### P1 定义属性
+
+```xml
+<!--定义属性-->
+<properties>
+    <spring.version>5.2.10.RELEASE</spring.version>
+</properties>
+```
+
+#### P2 引用属性
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-webmvc</artifactId>
+        <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-jdbc</artifactId>
+        <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-test</artifactId>
+        <version>${spring.version}</version>
+    </dependency>
+   	...
+</dependencies>
+```
+
+
+
+### 4.2 资源文件引用`pom.xml`的自定义属性
+
+#### P1 定义属性
+
+```xml
+<!--定义属性-->
+<properties>
+    <jdbc.url>jdbc:mysql://localhost:3306/ssm_db</jdbc.url>
+</properties>
+```
+
+#### P2 配置文件中引用自定义属性
+
+```properties
+jdbc.driver=com.mysql.cj.jdbc.Driver
+jdbc.url=${jdbc.url}
+jdbc.username=root
+jdbc.password=123456
+```
+
+#### P3 在`pom.xml`中开启资源文件目录加载属性的过滤器
+
+```xml
+<build>
+    <resources>
+        <resource>
+            <directory>${project.basedir}/src/main/resources</directory><!--相对路径-->
+            <filtering>true</filtering>
+        </resource>
+    </resources>
+</build>
+```
+
+
+
+### 4.3 其他属性
+
+![image-20251227161210081](images/image-20251227161210081.png)
+
+
+
+### 4.4 版本管理
+
+- 工程版本：
+  - SNAPSHOT（快照版本）：项目开发过程中临时输出的版本，随着开发的进展不断更新。
+  - RELEASE（发布版本）：项目开发到进入阶段里程碑后，向团队外部发布较为稳定的版本，称为发布版本。这种版本所对应的构建文件是稳定的，即便进行功能的后续开发，也不会改变当前发布版本内容。
+- 发布版本：
+  - alpha版
+  - beta版
+  - 纯数字版
 
 
 
@@ -267,7 +354,11 @@
 
 ## 5.多环境配置与应用
 
+### 5.1 多环境开发
 
+
+
+### 5.2 跳过测试
 
 
 
