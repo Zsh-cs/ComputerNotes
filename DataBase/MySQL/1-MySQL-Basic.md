@@ -846,6 +846,17 @@ select * from emp where (salary,managerid) = (
 
 示例如下：
 
+```mysql
+-- 查询与鹿杖客、宋远桥的职位及薪资相同的员工信息
+select * from emp where (job,salary) in (
+    select job,salary from emp where name in ('鹿杖客','宋远桥')
+);
+
+-- 查询入职日期是2006-01-01之后的员工信息及其部门信息
+select * from (select * from emp where entrydate>'2006-01-01') temp
+    left join dept on temp.dept_id=dept.id;
+```
+
 
 
 ---
@@ -856,11 +867,162 @@ select * from emp where (salary,managerid) = (
 
 ## 六、事务
 
+### 1.概述
+
+事务是一组操作的集合，它是一个不可分割的工作单位。事务会把所有操作作为一个整体一起向系统提交或撤销操作，这意味着这些操作要么同时成功，要么同时失败。
+
+比如对于转账操作，我们就需要通过事务来保障它的安全性：在业务逻辑执行之前开启事务，执行完毕后提交事务。如果执行过程中报错，则回滚事务，把数据恢复到事务开始之前的状态。
+
+![image-20251229214947783](images/image-20251229214947783.png)
+
+**注意**：MySQL的事务默认是自动提交的，也就是说，当执行完一条DML语句时，MySQL会立即隐
+
+式地提交事务。
 
 
 
+---
 
 
+
+### 2.事务操作
+
+#### 2.0 数据准备
+
+```mysql
+create table account(
+    id int primary key AUTO_INCREMENT comment 'ID',
+    name varchar(10) comment '姓名',
+    money double(10,2) comment '余额'
+) comment '账户表';
+insert into account(name, money) VALUES ('张三',2000), ('李四',2000);
+```
+
+
+
+#### 2.1 未开启事务
+
+##### P1 正常情况
+
+```mysql
+-- 转账操作：张三给李四转账1000
+-- 1.查询张三账户余额
+select money from account where name='张三';
+-- 2.如果张三余额大于1000，则将张三余额-1000
+update account set money=money-1000 where name='张三' and money>1000;
+-- 3.将李四余额+1000
+update account set money=money+1000 where name='李四';
+```
+
+运行以上三行代码后查看`account`表，可以看到转账成功：
+
+![image-20251229220642512](images/image-20251229220642512.png)
+
+##### P2 异常情况
+
+```mysql
+select money from account where name='张三';
+update account set money=money-1000 where name='张三' and money>1000;
+模拟程序出现异常
+update account set money=money+1000 where name='李四';
+```
+
+我们把张三和李四的余额都恢复到2000，运行以上三代码后查看`account`表，可以发现转账失败，张三余额减少1000，李四余额却没有增加，这是一个巨大的安全漏洞：
+
+![image-20251229220949920](images/image-20251229220949920.png)
+
+
+
+#### 2.2 开启事务
+
+##### P1 方法一
+
+```mysql
+-- 查看事务提交方式，设置为手动提交事务
+-- 这样我们执行的DML语句都不会提交, 需要手动的执行commit进行提交
+select @@autocommit;
+set @@autocommit=0;
+/*
+	此处是业务逻辑代码
+*/
+-- 执行以上代码，若正常则提交事务
+commit;
+-- 执行以上代码，若出现异常则回滚事务
+rollback;
+```
+
+##### P2 方法二
+
+```mysql
+-- 开启事务
+start transaction或begin;
+/*
+	此处是业务逻辑代码
+*/
+-- 执行以上代码，若正常则提交事务
+commit;
+-- 执行以上代码，若出现异常则回滚事务
+rollback;
+```
+
+
+
+---
+
+
+
+### 3.事务的四大特性ACID
+
++ **原子性(Atomicity)**：事务是不可分割的最小操作单元，要么全部成功，要么全部失败。
++ **一致性(Consitency)**：事务完成时，必须使所有的数据都保持一致状态。
++ **隔离性(Isolation)**：数据库系统提供的隔离机制，保证事务在不受外部并发操作影响的独立环境下运行。
++ **持久性(Durability)**：事务一旦提交或回滚，它对数据库中的数据的改变就是永久的。
+
+
+
+### 4.并发事务的三大问题
+
+#### 4.1 脏读
+
+**定义**：一个事务读到另一个事务还未提交的记录。
+
+![image-20251229223539672](images/image-20251229223539672.png)
+
+#### 4.2 不可重复读
+
+**定义**：一个事务先后读取同一条记录，但两次读取到的记录内容不同。
+
+![image-20251229223640756](images/image-20251229223640756.png)
+
+#### 4.3 幻读
+
+**定义**：一个事务按照条件查询记录时，没有对应的记录行，但是在插入记录时又发现这行记录已经存在，好像出现了“幻觉”。
+
+![image-20251229224128202](images/image-20251229224128202.png)
+
+
+
+### 5.事务隔离级别
+
+#### 5.1 事务隔离级别
+
+|        隔离级别         | 是否可能脏读 | 是否可能不可重复读 | 是否可能幻读 |
+| :---------------------: | :----------: | :----------------: | :----------: |
+|    Read Uncommitted     |      ✓       |         ✓          |      ✓       |
+|     Read Committed      |      ×       |         ✓          |      ✓       |
+| Repeatable Read（默认） |      ×       |         ×          |      ✓       |
+|      Serializable       |      ×       |         ×          |      ×       |
+
+隔离级别越高，数据越安全，但SQL性能越差。
+
+#### 5.2 语法
+
+```mysql
+-- 查看事务隔离级别
+select @@transaction_isolation;
+-- 设置事务隔离级别
+set session/global transaction isolation level 事务隔离级别;
+```
 
 
 

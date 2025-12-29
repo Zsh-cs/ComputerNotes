@@ -126,8 +126,7 @@ select * from emp where (job,salary) in (
     select job,salary from emp where name in ('鹿杖客','宋远桥')
 );
 -- 查询入职日期是2006-01-01之后的员工信息及其部门信息
-select emp.*,dept.*
-    from emp join dept on emp.dept_id = dept.id
-    where emp.entrydate>'2006-01-01';
+select * from (select * from emp where entrydate>'2006-01-01') temp
+    left join dept on temp.dept_id=dept.id;
 
 
