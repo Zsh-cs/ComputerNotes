@@ -1,8 +1,10 @@
 ## 零基础`SpringBoot`小项目
 
 > 该文章是本人观看B站up主“程序员风筑”于2024-04-23发布的“一小时带你从0到1实现一个`SpringBoot`项目开发”后，自行总结的笔记，视频链接如下：
+>
+> https://www.bilibili.com/video/BV1gm411m7i6/?spm_id_from=333.337.search-card.all.click&vd_source=9837edfda9265147596b239f82083a53
 
-[https://www.bilibili.com/video/BV1gm411m7i6/?spm_id_from=333.337.search-card.all.click&vd_source=9837edfda9265147596b239f82083a53]()
+
 
 ### 项目结构分析
 
