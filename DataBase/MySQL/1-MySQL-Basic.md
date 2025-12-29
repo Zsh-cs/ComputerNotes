@@ -437,7 +437,82 @@ revoke 权限列表 on 数据库名.表名 from '用户名'@'主机名';
 
 ## 三、函数
 
+### 1.字符串函数
 
+| 函数                       | 功能                                         |
+| :------------------------- | -------------------------------------------- |
+| `concat(s1,s2,...,sn)`     | 将s1，s2，...，sn拼接成一个字符串。          |
+| `lower(str)`               | 将字符串str全部转小写。                      |
+| `upper(str)`               | 将字符串str全部转大写。                      |
+| `lpad(str,n,pad)`          | 用字符串pad对str的左边填充，直到str长度为n。 |
+| `rpad(str,n,pad)`          | 用字符串pad对str的右边填充，直到str长度为n。 |
+| `trim(str)`                | 去除字符串str头部和尾部的空格。              |
+| `substring(str,start,len)` | 返回字符串str从start位置起，长len的子串。    |
+
+
+
+### 2.数值函数
+
+| 函数         | 功能                   |
+| :----------- | ---------------------- |
+| `ceil(x)`    | 向上取整。             |
+| `floor(x)`   | 向下取整。             |
+| `mod(x,y)`   | 返回x/y的余数。        |
+| `rand()`     | 返回0~1内的随机数。    |
+| `round(x,y)` | 将x四舍五入到y位小数。 |
+
+
+
+### 3.日期函数
+
+| 函数                                 | 功能                                                         |
+| :----------------------------------- | ------------------------------------------------------------ |
+| `curdate()`                          | 返回当前日期。                                               |
+| `curtime()`                          | 返回当前时间。                                               |
+| `now()`                              | 返回当前日期时间。                                           |
+| `year(date)`                         | 获取指定date的年。                                           |
+| `month(date)`                        | 获取指定date的月。                                           |
+| `day(date)`                          | 获取指定date的日。                                           |
+| `DATE_ADD(date, INTERVAL expr unit)` | date: 要操作的日期；expr: 添加的时间间隔值；unit: 时间单位，如 DAY、MONTH、YEAR等。返回一个日期加上一个时间间隔后的日期。 |
+| `datediff(date1,date2)`              | 返回date1和date2间隔的天数。                                 |
+
+
+
+### 4.流程函数
+
+#### P1 `if(value,t,f)`
+
+如果value为true，则返回t，否则返回f（t和f可以是任意类型的数据）。
+
+#### P2 `ifnull(value1,value2)`
+
+如果value1为空，则返回value2，否则正常返回value1。
+
+#### P3 `case`语句
+
+```mysql
+case 字段
+	when value1 then res1
+	when value2 then res2
+	...
+	else default_res
+end
+```
+
+如果字段值value1为true，返回res1；如果字段值value2为true，返回res2；...；其他情况下返回default_res。
+
+---
+
+```mysql
+case 
+	when condition1 then res1
+	when condition2 then res2
+	...
+	else default_res
+end
+```
+
+如果条件表达式condition1为true，返回res1；如果条件表达式condition2为true，返回res2；...；其他情况下返回default_res。
 
 
 
