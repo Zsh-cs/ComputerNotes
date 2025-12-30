@@ -1,0 +1,13 @@
+lesson: SpringBoot
+
+server:
+  port: 8082
+
+enterprise:
+  name: zsh
+  age: 18
+  tel: 83225361
+  subject:
+    - Java
+    - Python
+    - C++

@@ -9,9 +9,11 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.zsh</groupId>
-    <artifactId>springboot-quickstart</artifactId>
+    <artifactId>springboot-learn</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-
+    <name>springboot-learn</name>
+    <description>springboot-learn</description>
+    <url/>
     <licenses>
         <license/>
     </licenses>
@@ -24,27 +26,13 @@
         <tag/>
         <url/>
     </scm>
-
     <properties>
         <java.version>17</java.version>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <!--排除依赖：Tomcat-->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>
 
         <dependency>
