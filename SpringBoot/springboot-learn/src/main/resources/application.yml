@@ -1,3 +1,14 @@
+spring:
+  profiles:
+    active: produce
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: develop
+
 lesson: SpringBoot
 
 server:
@@ -11,3 +22,23 @@ enterprise:
     - Java
     - Python
     - C++
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: produce
+
+server:
+  port: 8083
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+
+server:
+  port: 8084

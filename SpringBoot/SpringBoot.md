@@ -184,7 +184,7 @@ Step5：启动系统自动生成的`Application`类，入门案例开发完毕�
 > </build>
 > ```
 
-Step1：通过Maven构建指令`package`，把SpringBoot项目打包成`jar`。
+Step1：通过Maven构建指令`package`（建议先`clean`一下），把SpringBoot项目打包成`jar`。
 
 ![image-20251230153820755](images/image-20251230153820755.png)
 
@@ -364,7 +364,86 @@ hobbies:
 
 ### 3.多环境启动
 
+#### 3.1 多环境启动配置
 
+##### P1 YAML版
+
+> [!Tip]
+>
+> 用`---`来区分不同环境。
+
+```yml
+# 启动指定环境，此处是启动生产环境
+spring:
+  profiles:
+    active: produce
+
+---
+
+# 设置开发环境
+spring:
+  config:
+    activate:
+      on-profile: develop
+      
+# 开发环境具体参数设定
+server:
+  port: 80
+      
+---
+
+# 设置生产环境
+spring:
+  config:
+    activate:
+      on-profile: produce
+    
+# 生产环境具体参数设定
+server:
+  port: 81
+  
+---
+
+# 设置测试环境
+spring:
+  config:
+    activate:
+      on-profile: test
+
+# 测试环境具体参数设定
+server:
+  port: 82
+```
+
+##### P2 `properties`版
+
+![image-20251231172343185](images/image-20251231172343185.png)
+
+
+
+#### 3.2 多环境启动`cmd`格式
+
+```cmd
+java -jar xxx.jar --spring.profiles.active=环境名称
+java -jar xxx.jar --server.port=测试人员指定端口
+java -jar xxx.jar --spring.profiles.active=环境名称 --server.port=测试人员指定端口
+```
+
+
+
+#### 3.3 Maven与SpringBoot多环境兼容
+
+##### P1 Maven中设置多环境属性
+
+![image-20251231174207712](images/image-20251231174207712.png)
+
+##### P2 SpringBoot中引用Maven属性
+
+![image-20251231174237744](images/image-20251231174237744.png)
+
+##### P3 对资源文件开启对默认占位符的解析
+
+![image-20251231174342585](images/image-20251231174342585.png)
 
 
 
@@ -374,17 +453,20 @@ hobbies:
 
 ### 4.配置文件分类
 
+> [!Caution]
+>
+> `classpath`即类路径，就是当前项目及其子文件夹。
+
+|    级别     |                 名称                 |              作用              |
+| :---------: | :----------------------------------: | :----------------------------: |
+| 1级（最高） | `filesystem: config/application.yml` |  留作系统打包后设置通用属性。  |
+|     2级     |    `filesystem: application.yml`     |  留作系统打包后设置通用属性。  |
+|     3级     | `classpath: config/application.yml`  | 用于系统开发阶段设置通用属性。 |
+| 4级（最低） |     `classpath: application.yml`     | 用于系统开发阶段设置通用属性。 |
 
 
 
 
----
-
----
-
-
-
-## 三、整合第三方框架
 
 
 
