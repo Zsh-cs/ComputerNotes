@@ -298,7 +298,7 @@ void test4() {
 
 #### 1.3 NULL值处理
 
-为什么要处理null值？来看下面的业务案例：
+为什么要处理null值？来看下面的业务场景：
 
 ![image-20260101173621814](images/image-20260101173621814.png)
 
@@ -500,7 +500,147 @@ public class User {
 
 ## 四、DML控制
 
+### 1.ID生成策略控制
 
+#### 1.1 `@TableId`
+
+`@TableId`注解是一种属性注解，位于实体类中用于表示主键的属性上方，可以设置当前类中主键属性的生成策略。示例如下：
+
+```java
+public class User {
+    @TableId(type=IdType.AUTO)
+    private Long id;
+}
+```
+
+该注解的相关属性主要有2个：
+
++ `value`：设置表主键名称。
++ `type`：设置当前类中主键属性的生成策略，值参照`IdType`枚举值。
+
+#### 1.2 ID生成策略
+
+| 策略值 |  策略名称   |                   说明                   |
+| :----: | :---------: | :--------------------------------------: |
+|   0    |    AUTO     |      使用数据库id自增策略控制id生成      |
+|   1    |    NONE     |             不设置id生成策略             |
+|   2    |    INPUT    |              用户手动输入id              |
+|   3    |  ASSIGN_ID  | 雪花算法生成id（可兼容数值型与字符串型） |
+|   4    | ASSIGN_UUID |            UUID算法生成id生成            |
+
+
+
+---
+
+
+
+### 2.多记录删除
+
+```java
+@Test
+void testDelete() {
+    List<Long> ids = new ArrayList<>();
+    ids.add(7L);
+    ids.add(8L);
+    ids.add(9L);
+    userDao.deleteByIds(ids);
+}
+```
+
+
+
+---
+
+
+
+### 3.逻辑删除
+
+#### 3.1 业务场景
+
+![image-20260102004159230](images/image-20260102004159230.png)
+
+现在员工张业绩已经离职，数据库会删除他的相关记录：
+
+![image-20260102004318225](images/image-20260102004318225.png)
+
+然而年底统计总业绩时却出现了漏洞：明显小于实际总业绩。
+
+![image-20260102004437901](images/image-20260102004437901.png)
+
+
+
+#### 3.2 普通删除 VS 逻辑删除
+
++ **普通删除**：将相关业务记录直接从数据库中丢弃。
++ **逻辑删除**：为业务记录设置一个字段“是否处于可用状态”，删除时设置该字段为“不可用状态”，记录仍保留在数据库中。此字段称为“**逻辑删除字段**”。
+
+
+
+#### 3.3 实现步骤
+
+1. 数据库对应表中添加逻辑删除字段`deleted`，默认值为0。
+
+2. 实体类中添加对应属性，并使用`@TableLogic`注解标记其为逻辑删除属性。
+
+   ```java
+   public class User {
+       @TableLogic
+       private Integer deleted;
+   }
+   ```
+
+3. 之后MP查询时会自动带上条件`where deleted=0`，忽略标记为“已删除”的记录。
+
+
+
+---
+
+
+
+### 4.乐观锁（并发访问）
+
+> [!Tip]
+>
+> 乐观锁机制下，每次修改都会执行`version++`操作，只有当`version`等于特定值时才允许线程执行修改操作。
+
+1. 数据库对应表中添加乐观锁字段`version`，默认值为1。
+
+2. 实体类中添加对应属性，并使用`@Version`注解标记其为乐观锁属性。
+
+   ```java
+   public class User {
+       @Version
+       private Integer version;
+   }
+   ```
+
+3. 配置乐观锁拦截器，实现锁机制对应的动态SQL语句拼接。
+
+   ```java
+   package com.zsh.config;
+   
+   import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+   import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
+   import org.springframework.context.annotation.Bean;
+   import org.springframework.context.annotation.Configuration;
+   
+   // 配置MP的拦截器
+   @Configuration
+   public class MpConfig {
+   
+       @Bean
+       public MybatisPlusInterceptor mpInterceptor() {
+           MybatisPlusInterceptor mpInterceptor = new MybatisPlusInterceptor();
+           // 添加MP的乐观锁拦截器
+           mpInterceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
+           return mpInterceptor;
+       }
+   }
+   ```
+
+4. 若使用乐观锁机制，在修改记录前必须先获取到该记录的`version`，然后才能正常执行。
+
+   ![image-20260102011410953](images/image-20260102011410953.png)
 
 
 
@@ -510,7 +650,21 @@ public class User {
 
 
 
-## 五、快速开发
+## 五、快速开发——代码生成器
+
+> [!Tip]
+>
+> 个人觉得这个东西了解即可，现在完全可以由AI大模型负责该工作。
+
+![image-20260102012022581](images/image-20260102012022581.png)
+
+![image-20260102012335179](images/image-20260102012335179.png)
+
++ 模板：MyBatisPlus提供。
++ 数据库相关配置：读取数据库获取信息。
++ 开发者自定义配置：手动配置。
+
+
 
 
 

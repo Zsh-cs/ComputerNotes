@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="mp_01_quickstart" />
+        <module name="mp_03_dml" />
         <module name="mp_02_condition_query" />
       </profile>
     </annotationProcessing>
@@ -16,6 +17,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="mp_01_quickstart" options="-parameters" />
       <module name="mp_02_condition_query" options="-parameters" />
+      <module name="mp_03_dml" options="-parameters" />
     </option>
   </component>
 </project>

@@ -3,5 +3,6 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/mp_01_quickstart/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/mp_02_condition_query/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mp_03_dml/src/main/java" charset="UTF-8" />
   </component>
 </project>
