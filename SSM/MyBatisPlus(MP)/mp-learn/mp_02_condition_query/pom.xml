@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.zsh</groupId>
-    <artifactId>mp_01_quickstart</artifactId>
+    <artifactId>mp_02_condition_query</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>mp_01_quickstart</name>
-    <description>mp_01_quickstart</description>
+    <name>mp_02_condition_query</name>
+    <description>mp_02_condition_query</description>
     <url/>
     <licenses>
         <license/>
