@@ -4,11 +4,13 @@
 >
 > + 【【极简入门】15分钟学会JWT的使用】https://www.bilibili.com/video/BV1cK4y197EM?vd_source=b7f14ba5e783353d06a99352d23ebca9
 > + https://blog.csdn.net/Tangzx_/article/details/135889397?fromshare=blogdetail&sharetype=blogdetail&sharerId=135889397&sharerefer=PC&sharesource=2401_83600210&sharefrom=from_link
+> + https://www.cnblogs.com/mysticbinary/p/19050592
 
 ## 一、技术介绍
 
 ### 1.概述
 
++ Token：是一个字符串，包含了用户信息和一些加密信息，常用于验证用户的身份和权限。Token的使用可以避免在每次请求时都需要进行用户身份验证而降低Web应用程序的性能，同时解决用户每次访问都需要登录的问题。
 + JWT(JSON Web Token)：通过数字签名的方式，以JSON对象为载体，在不同的服务终端之间安全的传输信息。
 + **作用**：授权认证。用户一旦登录，后续每个请求都将携带JWT，系统每次处理用户的请求之前，都要先进行JWT安全校验，只有校验通过才能继续处理请求。
 
@@ -59,6 +61,28 @@ JWT由三部分组成，用`.`拼接起来：
       secret
   )
   ```
+
+
+
+### 4.JWT的工作时序图
+
+#### 4.1 登录阶段
+
+*图片参考*：https://www.cnblogs.com/mysticbinary/p/19050592
+
+<img src="images/image-20260118180832824.png" alt="image-20260118180832824" style="zoom:80%;" />
+
+#### 4.2 访问受保护资源
+
+*图片参考*：https://www.cnblogs.com/mysticbinary/p/19050592
+
+<img src="images/image-20260118181556223.png" alt="image-20260118181556223" style="zoom:80%;" />
+
+#### 4.3 JWT令牌过期场景
+
+*图片来源*：https://www.cnblogs.com/mysticbinary/p/19050592
+
+![image-20260118181716563](images/image-20260118181716563.png)
 
 
 
