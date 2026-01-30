@@ -1,0 +1,83 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+  datasource:
+    druid:
+      driver-class-name: ${sky.datasource.driver-class-name}
+      url: jdbc:mysql://${sky.datasource.host}:${sky.datasource.port}/${sky.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${sky.datasource.username}
+      password: ${sky.datasource.password}
+  redis:
+    # 无密码
+    host: ${sky.redis.host}
+    port: ${sky.redis.port}
+    database: ${sky.redis.database}
+
+
+mybatis:
+  # mapper配置文件
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.sky.entity
+  configuration:
+    # 开启驼峰命名
+    map-underscore-to-camel-case: true
+
+
+mybatis-plus:
+  # 开启MP的控制台日志
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+
+#logging:
+#  level:
+#    com:
+#      sky:
+#        mapper: debug
+#        service: info
+#        controller: info
+
+
+sky:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: cszsh
+    #Caution: 设置jwt过期时间，尽量设得长一点，防止过没多久运行项目令牌就过期报401！
+    #Caution: 等项目上线后再改回来
+    admin-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: token
+    user-secret-key: itzsh
+    user-ttl: 7200000
+    user-token-name: authentication
+  # 阿里云OSS
+  aliyun.oss:
+    endpoint: ${sky.aliyun.oss.endpoint}
+    access-key-id: ${sky.aliyun.oss.access-key-id}
+    access-key-secret: ${sky.aliyun.oss.access-key-secret}
+    bucket-name: ${sky.aliyun.oss.bucket-name}
+  # 微信小程序
+  wechat:
+    appid: ${sky.wechat.appid}
+    secret: ${sky.wechat.secret}
+    mchid: ${sky.wechat.mchid}
+    mch-serial-no: ${sky.wechat.mch-serial-no}
+    # private-key-file-path: ${sky.wechat.private-key-file-path}
+    # wechat-pay-cert-file-path: ${sky.wechat.wechat-pay-cert-file-path}
+    api-v3-key: ${sky.wechat.api-v3-key}
+    notify-url: ${sky.wechat.notify-url}
+    refund-notify-url: ${sky.wechat.refund-notify-url}
+
+
+
+

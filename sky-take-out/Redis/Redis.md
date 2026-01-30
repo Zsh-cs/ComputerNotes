@@ -1,5 +1,9 @@
 # Redis
 
+> **参考视频或文章**：
+>
+> + 【黑马程序员Java项目实战《苍穹外卖》，最适合新手的SpringBoot+SSM的企业级Java项目实战】https://www.bilibili.com/video/BV1TP411v7v6?vd_source=b7f14ba5e783353d06a99352d23ebca9
+
 ## 一、技术介绍
 
 ### 1.概述
@@ -284,9 +288,287 @@ Redis的主流Java客户端有以下几个：
 
 ## 二、项目应用
 
+涉及到的文件如下：
+
+```yml
+sky-take-out: pom.xml
+
+sky-server: 
+	pom.xml
+	src/main/java/com.sky:
+		config: RedisConfig
+		controller:
+			admin: ShopController
+			user: ShopController
+	src/main/resources:
+		application.yml
+		application-dev.yml
+```
+
+![Redis](images/Redis.png)
 
 
 
+### 1.导入Spring Data Redis的`Maven`依赖坐标
+
+#### 1.1 `sky-take-out: pom.xml`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <version>2.7.3</version>
+    </parent>
+    
+    <groupId>com.sky</groupId>
+    <artifactId>sky-take-out</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+    
+    <modules>
+        <module>sky-common</module>
+        <module>sky-pojo</module>
+        <module>sky-server</module>
+    </modules>
+    
+    <properties>
+        <druid>1.2.1</druid>
+    </properties>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
+```
 
 
 
+#### 1.2 `sky-server: pom.xml`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>sky-take-out</artifactId>
+        <groupId>com.sky</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>sky-server</artifactId>
+    
+    <dependencies>
+        <dependency>
+            <groupId>com.sky</groupId>
+            <artifactId>sky-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sky</groupId>
+            <artifactId>sky-pojo</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>      
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```
+
+
+
+---
+
+
+
+### 2.配置Redis数据源
+
+#### 2.1 `application.yml`
+
+```yml
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true 
+  datasource:
+    druid:
+      driver-class-name: ${sky.datasource.driver-class-name}
+      url: jdbc:mysql://${sky.datasource.host}:${sky.datasource.port}/${sky.datasource.database}?			 serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${sky.datasource.username}
+      password: ${sky.datasource.password}
+  redis:
+    # 无密码
+    host: ${sky.redis.host}
+    port: ${sky.redis.port}
+    database: ${sky.redis.database}
+```
+
+
+
+#### 2.2 `application-dev.yml`
+
+```yml
+sky:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: localhost
+    port: 3306
+    database: sky_take_out
+    username: root   # 填写MySQL用户名
+    password: 123456 # 填写MySQL密码
+
+  redis:
+    # 无密码
+    host: localhost
+    port: 6379
+    database: 1 # 使用1号数据库（Redis默认为我们创建了16个数据库）
+```
+
+
+
+---
+
+
+
+### 3.编写Redis配置类`RedisConfig`
+
+```java
+/**
+ * Redis配置类
+ */
+@Configuration
+public class RedisConfig {
+
+    @Bean
+    public RedisTemplate redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate redisTemplate = new RedisTemplate();
+
+        // 设置Redis的连接工厂对象
+        redisTemplate.setConnectionFactory(factory);
+        // 设置Redis key的序列化器
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+
+        return redisTemplate;
+    }
+}
+```
+
+
+
+---
+
+
+
+### 4.使用Redis编写店铺营业状态接口
+
+#### 4.1 `admin/ShopController`
+
+```java
+/**
+ * 管理端-店铺营业状态
+ */
+@RestController("adminShopController")// 手动指定bean名称，防止冲突
+@RequestMapping("/admin/shop")
+public class ShopController {
+
+    // 存入Redis的字符串的key名称
+    private static final Object SHOP_STATUS="SHOP_STATUS";
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    // 通过Redis设置店铺营业状态
+    @PutMapping("/{status}")
+    public Result setStatus(@PathVariable Integer status) {
+        ValueOperations ops = redisTemplate.opsForValue();
+        ops.set(SHOP_STATUS,status);
+        return Result.success();
+    }
+
+
+    // 通过Redis获取店铺营业状态
+    @GetMapping("/status")
+    public Result<Integer> getStatus(){
+        ValueOperations ops = redisTemplate.opsForValue();
+        Integer status = (Integer) ops.get(SHOP_STATUS);
+        return Result.success(status);
+    }
+}
+```
+
+
+
+#### 4.2 `user/ShopController`
+
+```java
+/**
+ * 用户端-店铺营业状态
+ */
+@RestController("userShopController")// 手动指定bean名称，防止冲突
+@RequestMapping("/user/shop")
+public class ShopController {
+
+    // 存入Redis的字符串的key名称
+    private static final Object SHOP_STATUS="SHOP_STATUS";
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    // 通过Redis获取店铺营业状态
+    @GetMapping("/status")
+    public Result<Integer> getStatus(){
+        ValueOperations ops = redisTemplate.opsForValue();
+        Integer status = (Integer) ops.get(SHOP_STATUS);
+        return Result.success(status);
+    }
+}
+```

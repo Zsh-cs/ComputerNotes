@@ -1,0 +1,37 @@
+sky:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: localhost
+    port: 3306
+    database: sky_take_out
+    username: root   # 填写MySQL用户名
+    password: 123456 # 填写MySQL密码
+
+  redis:
+    # 无密码
+    host: localhost
+    port: 6379
+    database: 1 # 使用1号数据库（Redis默认为我们创建了16个数据库）
+
+  # 阿里云OSS
+  aliyun.oss:
+    endpoint: oss-cn-shenzhen.aliyuncs.com
+    #Caution: 调用Windows系统环境变量
+    access-key-id: ${ALIYUN_OSS_ACCESS_KEY_ID}
+    access-key-secret: ${ALIYUN_OSS_ACCESS_KEY_SECRET}
+    bucket-name: sky-zsh-cs
+
+  # 微信小程序
+  wechat:
+    appid: ${SKY_TAKE_OUT_WECHAT_APP_ID}
+    secret: ${SKY_TAKE_OUT_WECHAT_APP_SECRET}
+    mchid: 1561414331
+    mch-serial-no: 4B3B3DC35414AD50B1B755BAF8DE9CC7CF407606
+    # private-key-file-path:
+    # wechat-pay-cert-file-path:
+    api-v3-key: CZBK51236435wxpay435434323FFDuv3
+    # 支付成功回调：内网临时穿透域名+/notify/paySuccess
+    notify-url: https://59557efb.r36.cpolar.top/notify/paySuccess
+    # 退款成功回调：内网临时穿透域名+/notify/refundSuccess
+    refund-notify-url: https://59557efb.r36.cpolar.top/notify/refundSuccess
+

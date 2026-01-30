@@ -405,11 +405,11 @@ sky:
     admin-secret-key: cszsh
     #Caution: 设置jwt过期时间，尽量设得长一点，防止过没多久运行项目令牌就过期报401！
     #Caution: 等项目上线后再改回来
-    admin-ttl: 720000000
+    admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
     user-secret-key: itzsh
-    user-ttl: 720000000
+    user-ttl: 7200000
     user-token-name: authentication
 ```
 
