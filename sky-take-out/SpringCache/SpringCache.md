@@ -46,7 +46,9 @@ sky-server:
 	pom.xml
 	src/main/java/com.sky:
 		SkyApplication
-		
+		controller:
+			admin: SetmealController
+			u
 ```
 
 
