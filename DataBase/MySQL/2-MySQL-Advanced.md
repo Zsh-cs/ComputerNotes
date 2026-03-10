@@ -4,6 +4,10 @@
 >
 > ![image-20251228213625796](images/image-20251228213625796.png)
 
+> [!CAUTION]
+>
+> 注意，在MySQL进阶篇中，本人使用的是Ubuntu 24.04中的MySQL 8.0.45。
+
 
 
 ## 一、存储引擎
@@ -267,17 +271,123 @@ Memory引擎支持Hash索引，而InnoDB引擎具有自适应Hash功能，可以
 
 ### 3.索引分类
 
+#### 3.1 四种索引
+
+|   分类   |                         含义                         |           特点           |   关键字   |
+| :------: | :--------------------------------------------------: | :----------------------: | :--------: |
+| 主键索引 |               针对于表中主键创建的索引               | 默认自动创建，只能有一个 | `primary`  |
+| 唯一索引 |           避免同一个表中某数据列中的值重复           |        可以有多个        |  `unique`  |
+| 常规索引 |                   快速定位特定数据                   |        可以有多个        |            |
+| 全文索引 | 全文索引查找的是文本中的关键词，而不是比较索引中的值 |        可以有多个        | `fulltext` |
+
+
+
+#### 3.2 聚集索引与二级索引
+
+在InnoDB存储引擎中，根据索引的存储形式，又可以分为以下两种：
+
++ 聚集索引/聚簇索引(Clustered Index)：
+  + 将数据与索引放在一块存储，索引结构的叶子结点保存了行数据。
+  + 必须有，而且只能有一个。
+  + 聚集索引的选举规则：
+    + 如果存在主键，那么主键索引就是聚集索引。
+    + 如果不存在主键，那么将第一个唯一索引作为聚集索引。
+    + 如果既没有主键，也没有合适的唯一索引，那么InnoDB会自动生成一个rowid作为隐藏的聚集索引。
++ 二级索引/辅助索引(Secondary Index)：
+  + 将数据与索引分开存储，索引结构的叶子结点关联的是对应的主键。
+  + 可以存在多个。
+
+<img src="images/image-20260310210332974.png" alt="image-20260310210332974" style="zoom: 80%;" />
+
+
+
+#### 3.3 回表查询
+
+回表查询就是先走二级索引获得主键，再通过主键走聚集索引获得行。
+
+<img src="images/image-20260310210701636.png" alt="image-20260310210701636" style="zoom:80%;" />
+
+
+
+---
+
 
 
 ### 4.索引语法
+
+```mysql
+-- 创建索引
+create [unique/fulltext] index 索引名 on 表名 (索引关联字段1,...,索引关联字段n);
+-- 查看索引
+show index from 表名;
+-- 删除索引
+drop index 索引名 on 表名;
+```
+
+
+
+---
 
 
 
 ### 5.SQL性能分析
 
+#### 5.1 SQL执行频率
+
+连接MySQL数据库后，可以通过`show [session/global] status`命令来查询服务器状态信息。
+
+`show global status like 'Com_______'`这条命令（七个下划线）可以查看当前数据库的`INSERT`、`UPDATE`、`DELETE`、`SELECT`的访问频次。
+
+
+
+#### 5.2 慢查询日志
+
+慢查询日志记录了所有执行时间超过指定参数（long_query_time，单位：秒，默认为10秒）的所有SQL语句的日志。
+
+可以通过`show variables like '%slow_query%'`这条命令来查看MySQL的慢查询日志是否开启以及日志存放路径：
+
+<img src="images/image-20260310230249476.png" alt="image-20260310230249476" style="zoom: 80%;" />
+
+MySQL默认不开启慢查询日志，我们需要打开MySQL的配置文件`/etc/mysql/mysql.conf.d/mysqld.cnf`：
+
+```bash
+sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+```
+
+然后配置如下信息：
+
+```
+# 开启MySQL的慢查询日志
+slow_query_log = ON
+# 设置慢查询日志的时间为2秒，SQL语句执行时间超过2秒就视为慢查询，记录到慢查询日志中
+long_query_time = 2
+```
+
+配置完毕后，我们重启MySQL服务器，然后通过`sudo -i`进入root权限的Shell，再查看慢查询日志文件中记录的信息`/var/lib/mysql/Zsh-show.log`：
+
+<img src="images/image-20260310230816439.png" alt="image-20260310230816439" style="zoom:80%;" />
+
+导入1000w的模拟数据到数据库cszsh的表tb_sku中后，我们执行一条SQL：`select count(*) from tb_sku`，再去查看慢查询日志：
+
+<img src="images/image-20260310234146214.png" alt="image-20260310234146214" style="zoom:80%;" />
+
+<img src="images/image-20260310234044938.png" alt="image-20260310234044938" style="zoom:80%;" />
+
+可以发现，该SQL的执行时间超过2秒，因此被记录到了慢查询日志中。
+
+
+
+---
+
 
 
 ### 6.索引使用
+
+
+
+
+
+---
 
 
 
