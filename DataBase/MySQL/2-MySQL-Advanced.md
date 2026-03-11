@@ -377,13 +377,88 @@ long_query_time = 2
 
 
 
+#### 5.3 profile详情（已弃用）
+
+执行命令`select @@have_profiling`，可以查看当前MySQL是否支持profile操作。
+
+再执行命令`select @@profiling`，可以查看profiling是否打开，默认情况下是关闭的。
+
+我们可以通过执行命令`set profiling = 1`来打开profiling。
+
+之后，我们可以执行一系列的业务SQL操作，然后通过如下指令来查看这些SQL语句的执行耗时：
+
+```mysql
+-- 查看每一条SQL的耗时基本情况
+show profiles;
+-- 查看指定query_id的SQL各个阶段的耗时情况
+show profile for query query_id;
+-- 查看指定query_id的SQL的CPU使用情况
+show profile cpu for query query_id;
+```
+
+
+
+#### 5.4 explain执行计划
+
+通过`explain`或`desc`命令，我们可以获取到MySQL执行`select`语句的详细信息，包括执行过程中表如何连接以及连接顺序。语法如下：
+
+```mysql
+-- 直接在要分析的select语句前加上关键字explain/desc
+explain/desc select...;
+```
+
+使用`explain`分析`select * from tb_user where id = 1;`这条SQL语句，结果如下：
+
+<img src="images/image-20260311231551663.png" alt="image-20260311231551663" style="zoom:80%;" />
+
+主要字段含义如下：
+
+|      字段       |                             含义                             |                             备注                             |
+| :-------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+|      `id`       | select查询的序列号，表示查询中执行select子句或者是操作表的顺序 | 若id相同，则执行顺序从上到下；若id不同，则值越大的越先执行。 |
+|  `select_type`  |                         select的类型                         | 常见的取值有：SIMPLE（简单表，不适用表连接或子查询）、PRIMARY（主查询，即最外层的查询）、UNION（UNION中除第一个外的子查询）、SUBQUERY（非UNION中的子查询）。 |
+|     `type`      |                           连接类型                           | 性能由好到差的连接类型分别是NULL、system、const、eq_ref、ref、range、index、all。 |
+| `possible_keys` |               可能用在这张表上的一个或多个索引               |                                                              |
+|      `key`      |                    实际用在这张表上的索引                    |                                                              |
+|    `key_len`    |                       索引使用的字节数                       | 该值为索引字段最大可能长度，并非实际使用长度，在不损失精确性的前提下，长度越短越好。 |
+|     `rows`      |                    MySQL估计要查询的行数                     |                                                              |
+|   `filtered`    |            返回结果的行数占需要读取的行数的百分比            |                        该值越大越好。                        |
+
+
+
 ---
 
 
 
 ### 6.索引使用
 
+#### 6.1 验证索引效率
 
+在未建立索引之前，执行如下SQL语句，查看该SQL的耗时：
+
+```mysql
+select * from tb_sku where sn = '100000003145001'\G;
+```
+
+<img src="images/image-20260311235417020.png" alt="image-20260311235417020" style="zoom:67%;" />
+
+可以看到，该SQL的耗时较多，这是因为我们没有给`sn`这个字段建立索引。
+
+现在，我们针对`sn`字段建立索引：
+
+```mysql
+create index idx_sku_sn on tb_sku(sn);
+```
+
+然后再次执行那条SQL语句，耗时如下：
+
+<img src="images/image-20260312000036288.png" alt="image-20260312000036288" style="zoom:67%;" />
+
+可以看到，该SQL几乎不耗时，这说明索引大大提升了查询效率。
+
+
+
+#### 6.2 最左前缀法则
 
 
 
