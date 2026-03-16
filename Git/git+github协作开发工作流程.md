@@ -55,7 +55,7 @@ git checkout -b feature-a
 
 git add .
 git commit -m "新增a功能"
-git push origin feature-la
+git push origin feature-a
 ```
 
 #### 3.2 乙的操作（开发b模块）

@@ -27,7 +27,7 @@ git config --global user.email 1294012402@qq.com  # 1294012402@qq.com是GitHub�
 在`Git Bash`输入如下内容：
 
 ```bash
-git add remote origin https://github.com/Zsh-cs/Test.git  #上一步复制的远程仓库的HTTPS地址
+git remote add origin https://github.com/Zsh-cs/Test.git  #上一步复制的远程仓库的HTTPS地址
 git fetch  #拉取远程仓库
 git checkout main #将本地仓库由master分支切换到main分支
 ```
