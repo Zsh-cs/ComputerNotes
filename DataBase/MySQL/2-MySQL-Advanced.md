@@ -460,6 +460,121 @@ create index idx_sku_sn on tb_sku(sn);
 
 #### 6.2 最左前缀法则
 
+联合索引必须遵守最左前缀法则，最左前缀法则是指查询从索引的最左列开始，并且不跳过索引中的列。
+
+如果跳过了索引中的某一列，会导致索引部分失效（后面的字段索引失效）。
+
+例如，我为表`tb_user`中的三个字段`profession, age, status`创建了联合索引，然后依次执行以下查询语句，索引使用情况如下：
+
+```mysql
+select * from tb_user where profession='计算机' and age=18 and status='0';# 用到了联合索引
+select * from tb_user where profession='计算机' and age=18;# 用到了联合索引
+select * from tb_user where profession='计算机';# 用到了联合索引
+select * from tb_user where age=18 and status='0';# 查询没有从索引的最左列profession开始，导致索引失效
+select * from tb_user where profession='计算机' and status='0';# 用到了联合索引，但跳过了age，导致status字段索引失效
+```
+
+特别注意：以下查询语句虽然字段的书写顺序不同，但由于查询条件中包含索引的最左列`profession`，所以依然用到了联合索引，等价于上面第一条语句。
+
+```mysql
+select * from tb_user where age=18 and status='0' and profession='计算机';
+```
+
+
+
+#### 6.3 范围查询
+
+联合索引中，如果出现了范围查询(>,<)，那么范围查询右侧的列索引失效。示例如下：
+
+```mysql
+select * from tb_user where profession='计算机' and age>18 and status='0';# status字段索引失效
+select * from tb_user where profession='计算机' and age>=18 and status='0';# 三个字段都用到了联合索引
+```
+
+
+
+#### 6.4 索引失效情况
+
++ 如果在查询条件中对索引字段进行运算操作，那么索引会失效。
++ 如果在查询条件中使用字符串类型的索引字段时，没有加引号，那么索引会失效。
++ 模糊查询时，如果**仅仅**是尾部模糊匹配（`like 'a%'`），那么索引不会失效；如果存在头部模糊匹配（`like '%a'`），那么索引会失效。
++ 用or分割开的条件，如果or前的条件中的列有索引，or后的条件中的列没有索引，那么涉及到的索引全部失效。
++ 如果MySQL评估后认为使用索引比全表扫描慢，那么不使用索引。
+
+
+
+#### 6.5 SQL提示
+
+SQL提示是优化数据库查询的一个重要手段，简单来说就是在SQL语句中加入一些人为提示来达到优化数据库查询的目的。
+
++ `use index`：建议MySQL使用某个索引。
++ `ignore index`：告诉MySQL不要使用某个索引。
++ `force index`：强制MySQL使用某个索引。
+
+示例如下；
+```mysql
+explain select * from tb_user use index(idx_user_pro) where profession='软件工程';
+explain select * from tb_user ignore index(idx_user_pro) where profession='软件工程';
+explain select * from tb_user force index(idx_user_pro) where profession='软件工程';
+```
+
+
+
+#### 6.6 覆盖索引
+
+覆盖索引是指查询时使用到了索引，并且查询所需要返回的列都包含在索引中，无需回表查询。简单来说，就是索引本身“覆盖”了查询的所有需求。
+
+在查询过程中，我们应该尽可能使用覆盖索引，避免使用`select *`。
+
+先来看一下当前`tb_user`表具备的索引：
+
+<img src="images/image-20260328163055694.png" alt="image-20260328163055694" style="zoom: 67%;" />
+
+我们首先执行`explain select id,profession,age,status from tb_user where profession='软件工程' and age=31 and status='0'\G`，结果如下：
+
+<img src="images/image-20260328164331391.png" alt="image-20260328164331391" style="zoom:67%;" />
+
+结果中的`Extra: Using where; Using index`表明：查询时使用到了索引，并且查询所需要返回的列都包含在索引中，即查询使用了覆盖索引。这是因为`idx_user_pro_age_status`是一个二级索引，其叶子结点关联了对应的主键`id`，所以`select`的四个字段`id,profession,age,status`都可以在索引列中找到，无需回表查询。
+
+---
+
+接着我们执行`explain select id,profession,age,status,name from tb_user where profession='软件工程' and age=31 and status='0'\G` ，结果如下：
+
+<img src="images/image-20260328164420775.png" alt="image-20260328164420775" style="zoom:67%;" />
+
+结果中的`Extra: Using index condition`表明：查询时使用到了索引，但是需要回表查询，性能显然比覆盖索引慢。这是因为`select`的五个字段`id,profession,age,status,name`中，`name`字段不在索引列中，故还需要进行一次回表查询。
+
+
+
+#### 6.7 前缀索引
+
+##### P1 概述
+
+当字段类型为字符串时，有时候需要索引很长的字符串，这会让索引占据很大的空间，查询时浪费大量的磁盘IO，降低查询效率。
+
+此时我们可以只给字符串的一部分前缀建立索引，这样可以大大节约索引空间，从而提高查询效率。
+
+语法：`create index 索引名 on 表名(索引字段名(n));`，表示我要提取该字段的前n个字符建立索引。
+
+##### P2 如何决定最佳的前缀长度n？
+
+我们可以根据**索引的选择性**来决定。索引的选择性是指不重复的索引值数量和数据表的总记录数的比值，索引的选择性越高则查询效率越高。
+
+```mysql
+# 计算给整个email字段建立索引后，该索引的选择性
+select count(distinct email)/count(*) from tb_user;
+# 计算给email字段的前n个字符建立索引后，该索引的选择性
+select count(distinct substring(email,1,n))/count(*) from tb_user;
+```
+
+我们可以将n从高到低逐步试探，找到某个最合适的索引选择性，此时的n就是最佳的前缀长度。
+
+
+
+#### 6.8 单列索引与联合索引
+
+在业务场景中，如果存在多个查询条件，考虑为查询字段建立索引时，建议优先建立联合索引而非单列索引，这样可以尽可能避免回表查询。
+
 
 
 ---
@@ -468,7 +583,13 @@ create index idx_sku_sn on tb_sku(sn);
 
 ### 7.索引设计原则
 
-
+1. 针对于数据量较大，且查询比较频繁的表建立索引。
+2. 针对于常作为查询条件（`where`）、排序（`order by`）、分组（`group by`）操作的字段建立索引。
+3. 尽量选择区分度高（索引选择性高）的列作为索引，尽量建立唯一索引，区分度越高，使用索引的效率越高。
+4. 如果是字符串类型的字段，字段的长度较长，可以针对该字段的特点建立前缀索引。
+5. 尽量使用联合索引，减少单列索引，查询时，联合索引很多时候可以覆盖索引，节省存储空间，避免回表，提高查询效率。
+6. 要控制索引的数量，索引并不是多多益善，索引越多，维护索引结构的代价也就越大，会影响增删改的效率。
+7. 如果索引列不能存储`NULL`值，请在创建表时使用`NOT NULL`约束它。这样当优化器知道每列是否包含`NULL`值时，它可以更好地确定哪个索引用于查询是最有效的。
 
 
 
