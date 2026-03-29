@@ -601,7 +601,132 @@ select count(distinct substring(email,1,n))/count(*) from tb_user;
 
 ## 三、SQL优化
 
+### 1.插入数据
 
+#### 1.1 `insert`优化
+
++ 批量插入优于多次单条插入。
++ 手动提交事务优于自动提交事务。
++ 主键顺序插入优于乱序插入。
+
+#### 1.2 大批量插入数据
+
+如果需要一次性插入大批量数据，使用`insert`性能较低，此时可以使用MySQL提供的`load`指令进行插入，具体操作如下：
+
+```mysql
+# 客户端连接服务端时，加上参数 --local-infile
+mysql --local-infile -u root -p
+# 设置全局参数local_infile为1，开启从本地加载文件导入数据的开关
+set gloabl local_infile=1;
+# 执行load指令将准备好的数据加载到表结构中
+load data local infile '文件路径' into table 表名 fields terminated by ',' lines terminated by '\n';
+```
+
+<img src="images/image-20260329170928183.png" alt="image-20260329170928183" style="zoom: 80%;" />
+
+
+
+---
+
+
+
+### 2.主键优化
+
+#### 2.1 数据组织方式
+
+在InnoDB存储引擎中，表数据都是根据主键顺序组织存放的，采用这种存储方式的表称为**索引组织表**(Index Organized Table: IOT)。
+
+#### 2.2 页分裂
+
+在InnoDB存储引擎中，每一行数据都存放在页当中，页的大小是16KB。
+
+假如数据按主键顺序插入，那么数据会依次填入第一页，第一页满了就开辟第二页，然后数据依次填入第二页……以此类推。
+
+<img src="images/image-20260329173910462.png" alt="image-20260329173910462" style="zoom:80%;" />
+
+请看下面的示意图，假如数据按主键乱序插入，此时第一页和第二页已经被填满了，我们想要插入id=50的数据。
+
+<img src="images/image-20260329174221511.png" alt="image-20260329174221511" style="zoom:67%;" />
+
+那么InnoDB会开辟第三页，然后将第一页后半部分的数据挪到第三页，再把id=50的这条数据填入第三页，然后修改页与页之间的指针使之有序：
+
+<img src="images/image-20260329174535386.png" alt="image-20260329174535386" style="zoom:80%;" />
+
+这个过程叫做**页分裂**，新数据成功插入，但带来以下几个副作用：
+
++ 搬动大量数据行、修改页与页之间的指针，都需要耗费大量IO和CPU资源，让此次插入操作变得很慢。
++ 制造页内碎片，导致数据表占用的磁盘空间变大，但实际存储的数据量没变。
+
+#### 2.3 页合并
+
+当我们删除一行数据时，实际上它并没有被物理删除，只是被标记为“已删除”，并且它占用的空间允许被其他数据覆盖。
+
+当一页中删除的数据达到`MERGE_THRESHOLD`（默认为页的一半）时，InnoDB会开始寻找最邻近的页看看能否将两个页合并以优化空间使用情况。
+
+这个过程就叫做**页合并**。
+
+#### 2.4 主键设计原则
+
++ 在满足业务需求的前提下，尽量降低主键的长度。
+  + 这样可以减少二级索引叶子结点占用的磁盘空间，提高查询效率。
++ 插入数据时尽量顺序插入，选择`AUTO_INCREMENT`自增主键。
+  + 这样可以减少页分裂。
++ 尽量不要使用UUID做主键或其他自然主键（如身份证号）。
+  + 因为它们是无序的，导致数据按主键乱序插入，产生页分裂。
++ 在业务操作中，尽量避免对主键的修改。
+
+
+
+---
+
+
+
+### 3.`order by`优化
+
++ `Using filesort`：通过表的索引或全表扫描读取满足条件的数据行，然后在排序缓冲区(sort buffer)中完成排序操作。所有不通过索引**直接**返回排序结果的排序都叫做`FileSort`排序。
++ `Using index`：通过有序索引顺序扫描直接返回有序数据，不需要额外排序，操作效率高。
+
+所以我们要根据排序字段建立合适的索引，多字段排序时也遵循最左前缀法则（但是与字段顺序有关）。
+
+```mysql
+explain select id,age,phone from tb_user order by age asc, phone desc;# Using filesort
+create index idx_user_age_phone_ad on tb_user(age asc, phone desc);# 创建age升序、phone降序的联合索引
+explain select id,age,phone from tb_user order by age asc, phone desc;# Using index，性能提升
+```
+
+如果不可避免地出现`FileSort`排序或大数据量排序，那么我们可以适当增加排序缓冲区的大小（`sort_buffer_size`，默认为256KB）。
+
+
+
+---
+
+
+
+### 4.`group by`优化
+
+
+
+---
+
+
+
+### 5.`limit`优化
+
+
+
+---
+
+
+
+### 6.`count`优化
+
+
+
+---
+
+
+
+### 7.`update`优化
 
 
 
